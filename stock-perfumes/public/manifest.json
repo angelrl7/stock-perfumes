@@ -1,0 +1,9 @@
+{
+  "name": "Stock Perfumes",
+  "short_name": "Perfumes",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f6f3ed",
+  "theme_color": "#1c1917",
+  "icons": []
+}
