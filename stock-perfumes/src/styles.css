@@ -1,6 +1,7 @@
 /* ============================================
    STOCK PERFUMES — marfil, tinta y ámbar
    Mobile-first: pensado para usarse desde el celular
+   Modo oscuro: [data-tema="oscuro"] en <html>
    ============================================ */
 
 :root {
@@ -13,9 +14,38 @@
   --ambar-oscuro: #8a6222;
   --rojo: #b3372e;
   --rojo-fondo: #faeceb;
+  --rojo-borde-suave: #e6c2be;
+  --rojo-fondo-suave: #fdf9f8;
   --verde: #3d6b45;
+  --verde-fondo: #ecf3ed;
+  --verde-borde: #bcd4c0;
+  --campo-fondo: #ffffff;
+  --acento-fondo: #f5efe3;
+  --acento-borde: #e9dfc9;
   --fuente-display: "Fraunces", Georgia, serif;
   --fuente-texto: "Inter", system-ui, sans-serif;
+  color-scheme: light;
+}
+
+:root[data-tema="oscuro"] {
+  --marfil: #17130f;
+  --marfil-card: #211c17;
+  --tinta: #ede7dc;
+  --tinta-suave: #a2988a;
+  --linea: #38312a;
+  --ambar: #d69a45;
+  --ambar-oscuro: #e2ae63;
+  --rojo: #e07a70;
+  --rojo-fondo: #3a211e;
+  --rojo-borde-suave: #5a332e;
+  --rojo-fondo-suave: #2a1c19;
+  --verde: #8fc099;
+  --verde-fondo: #20301f;
+  --verde-borde: #3c5a3e;
+  --campo-fondo: #2a241e;
+  --acento-fondo: #2d2519;
+  --acento-borde: #4b3d26;
+  color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
@@ -58,7 +88,7 @@ input { font-family: inherit; font-size: 16px; } /* 16px evita el zoom de iOS */
 
 /* ---------- Campos ---------- */
 .campo { display: block; margin-bottom: 14px; }
-.campo span {
+.campo > span {
   display: block;
   font-size: 12px;
   font-weight: 600;
@@ -72,7 +102,7 @@ input { font-family: inherit; font-size: 16px; } /* 16px evita el zoom de iOS */
   padding: 11px 12px;
   border: 1px solid var(--linea);
   border-radius: 10px;
-  background: #fff;
+  background: var(--campo-fondo);
   color: var(--tinta);
 }
 .campo input:disabled { background: var(--marfil); color: var(--tinta-suave); }
@@ -103,17 +133,27 @@ input { font-family: inherit; font-size: 16px; } /* 16px evita el zoom de iOS */
   padding: 8px 12px;
   border: 1px solid var(--linea);
   border-radius: 8px;
-  background: #fff;
+  background: var(--campo-fondo);
   font-size: 13px;
   font-weight: 600;
   color: var(--tinta);
 }
 .btn-ajustar { border-color: var(--ambar); color: var(--ambar-oscuro); }
+.btn-vender { border-color: var(--ambar); background: var(--ambar); color: #fff; }
+.btn-vender:disabled { opacity: 0.45; cursor: default; }
 .btn-rojo { border-color: var(--rojo); background: var(--rojo); color: #fff; }
 .btn-texto-rojo {
   border: none; background: none; color: var(--rojo);
   font-size: 13px; font-weight: 600; padding: 4px 0;
 }
+.btn-tema {
+  border: none;
+  background: none;
+  font-size: 17px;
+  padding: 2px 4px;
+  line-height: 1;
+}
+.btn-tema-login { position: fixed; top: 14px; right: 14px; z-index: 20; font-size: 20px; }
 .error-msg {
   background: var(--rojo-fondo);
   color: var(--rojo);
@@ -137,13 +177,14 @@ input { font-family: inherit; font-size: 16px; } /* 16px evita el zoom de iOS */
 .header-titulo { display: flex; align-items: baseline; justify-content: space-between; }
 .header-titulo h1 { font-size: 22px; }
 .header-flor { color: var(--ambar); font-size: 16px; }
+.header-acciones { display: flex; align-items: center; gap: 12px; }
 .btn-salir {
   border: none; background: none; color: var(--tinta-suave);
   font-size: 13px; font-weight: 500; text-decoration: underline;
 }
 .tabs { display: flex; gap: 4px; margin-top: 12px; }
 .tabs button {
-  padding: 10px 16px;
+  padding: 10px 12px;
   border: none;
   background: none;
   font-size: 14px;
@@ -162,6 +203,13 @@ input { font-family: inherit; font-size: 16px; } /* 16px evita el zoom de iOS */
   font-size: 11px;
   padding: 1px 7px;
 }
+.badge-deuda {
+  background: var(--ambar);
+  color: #fff;
+  border-radius: 99px;
+  font-size: 11px;
+  padding: 1px 7px;
+}
 
 /* ---------- Contenido / lista ---------- */
 .contenido { padding: 16px; flex: 1; }
@@ -170,7 +218,8 @@ input { font-family: inherit; font-size: 16px; } /* 16px evita el zoom de iOS */
   padding: 11px 14px;
   border: 1px solid var(--linea);
   border-radius: 99px;
-  background: #fff;
+  background: var(--campo-fondo);
+  color: var(--tinta);
   margin-bottom: 16px;
 }
 .lista { display: flex; flex-direction: column; gap: 12px; padding-bottom: 90px; }
@@ -189,7 +238,7 @@ input { font-family: inherit; font-size: 16px; } /* 16px evita el zoom de iOS */
   padding: 14px;
   align-items: flex-start;
 }
-.card-bajo { border-color: #e6c2be; background: #fdf9f8; }
+.card-bajo { border-color: var(--rojo-borde-suave); background: var(--rojo-fondo-suave); }
 .card-frasco {
   display: flex; flex-direction: column; align-items: center; gap: 2px;
   padding-top: 2px;
@@ -214,6 +263,60 @@ input { font-family: inherit; font-size: 16px; } /* 16px evita el zoom de iOS */
 .alerta-bajo { margin: 8px 0 0; font-size: 12px; color: var(--rojo); font-weight: 600; }
 .card-acciones { display: flex; flex-direction: column; gap: 8px; }
 
+/* ---------- Fotos de producto ---------- */
+.card-foto {
+  width: 56px;
+  height: 70px;
+  padding: 0;
+  border: 1px solid var(--linea);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--campo-fondo);
+  cursor: zoom-in;
+}
+.card-foto img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.foto-ampliada {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(0, 0, 0, 0.85);
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  cursor: zoom-out;
+}
+.foto-ampliada img {
+  max-width: 100%;
+  max-height: 88dvh;
+  border-radius: 12px;
+  object-fit: contain;
+}
+.foto-boton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+  border: 1.5px dashed var(--linea);
+  border-radius: 10px;
+  background: var(--campo-fondo);
+  color: var(--tinta-suave);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 6px;
+}
+.foto-preview { display: flex; align-items: flex-end; gap: 12px; margin-top: 6px; }
+.foto-preview img {
+  width: 88px;
+  height: 110px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid var(--linea);
+}
+.foto-preview-acciones { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+.foto-preview-acciones label.btn-chico { cursor: pointer; display: inline-flex; }
+
 /* ---------- FAB ---------- */
 .fab {
   position: fixed;
@@ -227,14 +330,14 @@ input { font-family: inherit; font-size: 16px; } /* 16px evita el zoom de iOS */
   color: var(--marfil);
   font-size: 30px;
   line-height: 1;
-  box-shadow: 0 6px 18px rgba(28, 25, 23, 0.25);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
 }
 
 /* ---------- Modales ---------- */
 .modal-fondo {
   position: fixed;
   inset: 0;
-  background: rgba(28, 25, 23, 0.45);
+  background: rgba(0, 0, 0, 0.5);
   display: grid;
   place-items: end center;
   z-index: 50;
@@ -252,14 +355,15 @@ input { font-family: inherit; font-size: 16px; } /* 16px evita el zoom de iOS */
 .modal-sub { color: var(--tinta-suave); font-size: 14px; margin: -8px 0 16px; }
 .modal-botones { display: flex; gap: 10px; margin-top: 6px; }
 .vista-previa {
-  background: #f5efe3;
-  border: 1px solid #e9dfc9;
+  background: var(--acento-fondo);
+  border: 1px solid var(--acento-borde);
   border-radius: 10px;
   padding: 10px 12px;
   font-size: 14px;
   margin: 0 0 14px;
 }
 .vista-previa strong { color: var(--ambar-oscuro); font-size: 16px; }
+.vista-previa strong.texto-rojo { color: var(--rojo); }
 .zona-borrado { margin-top: 18px; border-top: 1px solid var(--linea); padding-top: 14px; }
 .confirmar-borrado {
   display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
@@ -273,24 +377,123 @@ input { font-family: inherit; font-size: 16px; } /* 16px evita el zoom de iOS */
   padding: 10px;
   border: 1px solid var(--linea);
   border-radius: 10px;
-  background: #fff;
+  background: var(--campo-fondo);
   font-weight: 600;
   font-size: 14px;
   color: var(--tinta-suave);
 }
 .tipo-selector button.activo {
   border-color: var(--ambar);
-  background: #f5efe3;
+  background: var(--acento-fondo);
   color: var(--tinta);
 }
 .stepper { display: flex; gap: 8px; }
-.stepper input { flex: 1; text-align: center; padding: 11px; border: 1px solid var(--linea); border-radius: 10px; }
+.stepper input {
+  flex: 1; min-width: 0; text-align: center; padding: 11px;
+  border: 1px solid var(--linea); border-radius: 10px;
+  background: var(--campo-fondo); color: var(--tinta);
+}
 .stepper button {
   width: 48px;
   border: 1px solid var(--linea);
   border-radius: 10px;
-  background: #fff;
+  background: var(--campo-fondo);
   font-size: 20px;
+  color: var(--tinta);
+}
+
+/* ---------- Ventas ---------- */
+.ventas { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.venta {
+  background: var(--marfil-card);
+  border: 1px solid var(--linea);
+  border-radius: 14px;
+  padding: 14px;
+}
+.venta-saldada { border-color: var(--verde-borde); background: var(--verde-fondo); }
+.venta-cabecera { display: flex; justify-content: space-between; gap: 12px; }
+.venta-info { display: flex; flex-direction: column; min-width: 0; }
+.venta-cliente { font-weight: 700; font-size: 16px; }
+.venta-detalle { font-size: 14px; color: var(--tinta); margin-top: 1px; }
+.venta-meta { font-size: 12px; color: var(--tinta-suave); margin-top: 3px; }
+.venta-montos { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex-shrink: 0; }
+.venta-total { font-size: 16px; }
+.venta-saldo { font-size: 13px; font-weight: 700; color: var(--rojo); }
+.chip-pagada {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--verde);
+  background: var(--marfil-card);
+  border: 1px solid var(--verde-borde);
+  border-radius: 99px;
+  padding: 3px 10px;
+}
+.venta-pagos {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 8px 0 0;
+  border-top: 1px dashed var(--linea);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.venta-pagos li {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--tinta-suave);
+}
+.venta-pagos li strong { color: var(--verde); font-weight: 600; }
+.venta-acciones {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  margin-top: 10px;
+}
+.btn-agregar-pago {
+  border: none;
+  background: none;
+  color: var(--ambar-oscuro);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 4px 0;
+}
+.btn-ticket {
+  border: none;
+  background: none;
+  color: var(--tinta-suave);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 0;
+}
+.pago-form { display: flex; gap: 8px; margin-top: 10px; align-items: stretch; }
+.pago-form input {
+  min-width: 0;
+  padding: 9px 10px;
+  border: 1px solid var(--linea);
+  border-radius: 10px;
+  background: var(--campo-fondo);
+  color: var(--tinta);
+  font-size: 14px;
+}
+.pago-form input[type="number"] { flex: 1; }
+.pago-form input[type="date"] { width: 128px; }
+.venta .error-msg { margin: 10px 0 0; }
+
+/* ---------- Sub-pestañas del historial ---------- */
+.sub-tabs { display: flex; gap: 8px; margin-bottom: 14px; }
+.sub-tabs button {
+  padding: 8px 14px;
+  border: 1px solid var(--linea);
+  border-radius: 99px;
+  background: var(--campo-fondo);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--tinta-suave);
+}
+.sub-tabs button.activo {
+  border-color: var(--ambar);
+  background: var(--acento-fondo);
   color: var(--tinta);
 }
 
@@ -313,8 +516,8 @@ input { font-family: inherit; font-size: 16px; } /* 16px evita el zoom de iOS */
   padding: 4px 9px;
   border-radius: 99px;
 }
-.mov-entrada { color: var(--verde); background: #ecf3ed; }
-.mov-venta { color: var(--ambar-oscuro); background: #f5efe3; }
+.mov-entrada { color: var(--verde); background: var(--verde-fondo); }
+.mov-venta { color: var(--ambar-oscuro); background: var(--acento-fondo); }
 .mov-ajuste { color: var(--tinta-suave); background: var(--marfil); }
 .mov-info { flex: 1; display: flex; flex-direction: column; min-width: 0; }
 .mov-nombre { font-weight: 600; font-size: 14px; }

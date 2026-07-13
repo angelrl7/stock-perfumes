@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { Perfume } from "../types";
 import { formatoARS, precioSugerido } from "../lib/precio";
 
@@ -5,6 +6,7 @@ interface Props {
   perfume: Perfume;
   onEditar: () => void;
   onAjustar: () => void;
+  onVender: () => void;
 }
 
 /** Frasquito SVG cuyo nivel de "líquido" representa el stock. */
@@ -37,7 +39,8 @@ function Frasquito({ stock, minimo }: { stock: number; minimo: number }) {
   );
 }
 
-export default function PerfumeCard({ perfume, onEditar, onAjustar }: Props) {
+export default function PerfumeCard({ perfume, onEditar, onAjustar, onVender }: Props) {
+  const [verFoto, setVerFoto] = useState(false);
   const sugerido = precioSugerido(perfume);
   const bajo = perfume.stock <= perfume.stock_minimo;
   const esManual = perfume.precio_manual != null && perfume.precio_manual > 0;
@@ -45,7 +48,17 @@ export default function PerfumeCard({ perfume, onEditar, onAjustar }: Props) {
   return (
     <article className={`card ${bajo ? "card-bajo" : ""}`}>
       <div className="card-frasco">
-        <Frasquito stock={perfume.stock} minimo={perfume.stock_minimo} />
+        {perfume.foto_url ? (
+          <button
+            className="card-foto"
+            onClick={() => setVerFoto(true)}
+            aria-label={`Ver foto de ${perfume.nombre}`}
+          >
+            <img src={perfume.foto_url} alt={perfume.nombre} loading="lazy" />
+          </button>
+        ) : (
+          <Frasquito stock={perfume.stock} minimo={perfume.stock_minimo} />
+        )}
         <span className={`card-stock ${bajo ? "stock-bajo" : ""}`}>
           {perfume.stock}
         </span>
@@ -72,9 +85,22 @@ export default function PerfumeCard({ perfume, onEditar, onAjustar }: Props) {
       </div>
 
       <div className="card-acciones">
+        <button
+          className="btn-chico btn-vender"
+          onClick={onVender}
+          disabled={perfume.stock <= 0}
+        >
+          Vender
+        </button>
         <button className="btn-chico btn-ajustar" onClick={onAjustar}>± Stock</button>
         <button className="btn-chico" onClick={onEditar}>Editar</button>
       </div>
+
+      {verFoto && perfume.foto_url && (
+        <div className="foto-ampliada" onClick={() => setVerFoto(false)}>
+          <img src={perfume.foto_url} alt={perfume.nombre} />
+        </div>
+      )}
     </article>
   );
 }

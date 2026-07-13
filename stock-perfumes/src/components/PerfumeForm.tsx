@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { Perfume, PerfumeInput } from "../types";
 import { formatoARS, precioSugerido } from "../lib/precio";
+import { borrarFoto, comprimirImagen, subirFoto } from "../lib/fotos";
 
 interface Props {
   perfume?: Perfume; // si viene, es edición
@@ -19,6 +20,10 @@ export default function PerfumeForm({ perfume, onGuardar, onEliminar, onCerrar }
   );
   const [stock, setStock] = useState(String(perfume?.stock ?? 0));
   const [stockMinimo, setStockMinimo] = useState(String(perfume?.stock_minimo ?? 2));
+  const [fotoUrl, setFotoUrl] = useState<string | null>(perfume?.foto_url ?? null);
+  const [fotoNueva, setFotoNueva] = useState<Blob | null>(null);
+  const [fotoPreview, setFotoPreview] = useState<string | null>(perfume?.foto_url ?? null);
+  const [procesandoFoto, setProcesandoFoto] = useState(false);
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmarBorrado, setConfirmarBorrado] = useState(false);
@@ -30,6 +35,33 @@ export default function PerfumeForm({ perfume, onGuardar, onEliminar, onCerrar }
   };
   const vistaPrevia = precioSugerido(numeros);
 
+  const elegirFoto = async (archivo: File | undefined) => {
+    if (!archivo) return;
+    setProcesandoFoto(true);
+    setError(null);
+    try {
+      const blob = await comprimirImagen(archivo);
+      if (fotoPreview && fotoPreview !== perfume?.foto_url) {
+        URL.revokeObjectURL(fotoPreview);
+      }
+      setFotoNueva(blob);
+      setFotoPreview(URL.createObjectURL(blob));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "No se pudo cargar la foto.");
+    } finally {
+      setProcesandoFoto(false);
+    }
+  };
+
+  const quitarFoto = () => {
+    if (fotoPreview && fotoPreview !== perfume?.foto_url) {
+      URL.revokeObjectURL(fotoPreview);
+    }
+    setFotoNueva(null);
+    setFotoUrl(null);
+    setFotoPreview(null);
+  };
+
   const guardar = async () => {
     if (!nombre.trim()) {
       setError("Poné un nombre para el perfume.");
@@ -37,7 +69,13 @@ export default function PerfumeForm({ perfume, onGuardar, onEliminar, onCerrar }
     }
     setGuardando(true);
     setError(null);
+    let fotoSubida: string | null = null;
     try {
+      let foto = fotoUrl;
+      if (fotoNueva) {
+        fotoSubida = await subirFoto(fotoNueva);
+        foto = fotoSubida;
+      }
       await onGuardar({
         nombre: nombre.trim(),
         marca: marca.trim(),
@@ -46,9 +84,12 @@ export default function PerfumeForm({ perfume, onGuardar, onEliminar, onCerrar }
         precio_manual: numeros.precio_manual,
         stock: parseInt(stock) || 0,
         stock_minimo: parseInt(stockMinimo) || 0,
+        foto_url: foto,
       });
       onCerrar();
     } catch (e) {
+      // Si la foto se subió pero el guardado falló, la limpiamos del Storage.
+      if (fotoSubida) await borrarFoto(fotoSubida);
       setError(e instanceof Error ? e.message : "Error al guardar.");
       setGuardando(false);
     }
@@ -58,6 +99,40 @@ export default function PerfumeForm({ perfume, onGuardar, onEliminar, onCerrar }
     <div className="modal-fondo" onClick={onCerrar}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <h2>{perfume ? "Editar perfume" : "Nuevo perfume"}</h2>
+
+        <div className="campo">
+          <span>Foto (opcional)</span>
+          {fotoPreview ? (
+            <div className="foto-preview">
+              <img src={fotoPreview} alt="Foto del perfume" />
+              <div className="foto-preview-acciones">
+                <label className="btn-chico">
+                  Cambiar
+                  <input
+                    type="file"
+                    accept="image/*"
+                    hidden
+                    onChange={(e) => elegirFoto(e.target.files?.[0])}
+                  />
+                </label>
+                <button className="btn-texto-rojo" onClick={quitarFoto}>
+                  Quitar
+                </button>
+              </div>
+            </div>
+          ) : (
+            <label className="foto-boton">
+              {procesandoFoto ? "Procesando…" : "📷 Sacar o elegir foto"}
+              <input
+                type="file"
+                accept="image/*"
+                hidden
+                disabled={procesandoFoto}
+                onChange={(e) => elegirFoto(e.target.files?.[0])}
+              />
+            </label>
+          )}
+        </div>
 
         <label className="campo">
           <span>Nombre</span>
