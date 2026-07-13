@@ -1,6 +1,6 @@
 {
-  "name": "Stock Perfumes",
-  "short_name": "Perfumes",
+  "name": "Stock Productos",
+  "short_name": "Productos",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f6f3ed",

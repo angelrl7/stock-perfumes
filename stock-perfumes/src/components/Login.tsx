@@ -27,7 +27,7 @@ export default function Login() {
       <div className="login-card">
         <div className="login-marca">
           <span className="login-flor">✦</span>
-          <h1>Stock Perfumes</h1>
+          <h1>Stock Productos</h1>
           <p>Ingresá con tu cuenta para ver el inventario</p>
         </div>
 

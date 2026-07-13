@@ -30,7 +30,7 @@ export default function Ventas({ ventas, onPago }: Props) {
     return (
       <p className="vacio">
         No hay ventas con pagos pendientes. Las ventas nuevas se cargan con el botón
-        "Vender" de un perfume; cuando se saldan pasan al Historial.
+        "Vender" de un producto; cuando se saldan pasan al Historial.
       </p>
     );
   }

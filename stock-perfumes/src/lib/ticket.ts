@@ -31,7 +31,7 @@ function construirTicket(venta: Venta): jsPDF {
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(13);
-  doc.text("STOCK PERFUMES", cx, y, { align: "center" });
+  doc.text("STOCK PRODUCTOS", cx, y, { align: "center" });
   y += 5;
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);

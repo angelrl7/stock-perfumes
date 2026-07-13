@@ -64,7 +64,7 @@ export default function PerfumeForm({ perfume, onGuardar, onEliminar, onCerrar }
 
   const guardar = async () => {
     if (!nombre.trim()) {
-      setError("Poné un nombre para el perfume.");
+      setError("Poné un nombre para el producto.");
       return;
     }
     setGuardando(true);
@@ -98,13 +98,13 @@ export default function PerfumeForm({ perfume, onGuardar, onEliminar, onCerrar }
   return (
     <div className="modal-fondo" onClick={onCerrar}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <h2>{perfume ? "Editar perfume" : "Nuevo perfume"}</h2>
+        <h2>{perfume ? "Editar producto" : "Nuevo producto"}</h2>
 
         <div className="campo">
           <span>Foto (opcional)</span>
           {fotoPreview ? (
             <div className="foto-preview">
-              <img src={fotoPreview} alt="Foto del perfume" />
+              <img src={fotoPreview} alt="Foto del producto" />
               <div className="foto-preview-acciones">
                 <label className="btn-chico">
                   Cambiar
@@ -136,12 +136,12 @@ export default function PerfumeForm({ perfume, onGuardar, onEliminar, onCerrar }
 
         <label className="campo">
           <span>Nombre</span>
-          <input value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="One Million 100ml" />
+          <input value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Nombre del producto" />
         </label>
 
         <label className="campo">
           <span>Marca</span>
-          <input value={marca} onChange={(e) => setMarca(e.target.value)} placeholder="Paco Rabanne" />
+          <input value={marca} onChange={(e) => setMarca(e.target.value)} placeholder="Marca del producto" />
         </label>
 
         <div className="campos-fila">
@@ -188,13 +188,13 @@ export default function PerfumeForm({ perfume, onGuardar, onEliminar, onCerrar }
           <div className="zona-borrado">
             {confirmarBorrado ? (
               <div className="confirmar-borrado">
-                <span>¿Seguro? Se borra el perfume y no se puede deshacer.</span>
+                <span>¿Seguro? Se borra el producto y no se puede deshacer.</span>
                 <button className="btn-chico btn-rojo" onClick={onEliminar}>Sí, borrar</button>
                 <button className="btn-chico" onClick={() => setConfirmarBorrado(false)}>No</button>
               </div>
             ) : (
               <button className="btn-texto-rojo" onClick={() => setConfirmarBorrado(true)}>
-                Borrar perfume
+                Borrar producto
               </button>
             )}
           </div>

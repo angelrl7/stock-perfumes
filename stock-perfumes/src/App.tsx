@@ -112,7 +112,7 @@ function Panel({
     <div className="app">
       <header className="header">
         <div className="header-titulo">
-          <h1><span className="header-flor">✦</span> Stock Perfumes</h1>
+          <h1><span className="header-flor">✦</span> Stock Productos</h1>
           <div className="header-acciones">
             <button className="btn-tema" onClick={onTema} aria-label="Cambiar tema">
               {tema === "oscuro" ? "☀️" : "🌙"}
@@ -147,12 +147,12 @@ function Panel({
             />
 
             {cargando ? (
-              <p className="vacio">Cargando perfumes…</p>
+              <p className="vacio">Cargando productos…</p>
             ) : filtrados.length === 0 ? (
               <p className="vacio">
                 {perfumes.length === 0
-                  ? "No hay perfumes cargados. Agregá el primero con el botón +."
-                  : "Ningún perfume coincide con la búsqueda."}
+                  ? "No hay productos cargados. Agregá el primero con el botón +."
+                  : "Ningún producto coincide con la búsqueda."}
               </p>
             ) : (
               <div className="lista">
@@ -168,7 +168,7 @@ function Panel({
               </div>
             )}
 
-            <button className="fab" onClick={() => setFormAbierto(true)} aria-label="Agregar perfume">
+            <button className="fab" onClick={() => setFormAbierto(true)} aria-label="Agregar producto">
               +
             </button>
           </>
