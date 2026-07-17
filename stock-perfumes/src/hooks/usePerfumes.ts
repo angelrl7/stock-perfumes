@@ -56,7 +56,7 @@ export function usePerfumes(usuario: string) {
   const crear = async (datos: PerfumeInput) => {
     const { data, error } = await supabase
       .from("perfumes")
-      .insert(datos)
+      .insert({ ...datos, creado_por: usuario })
       .select()
       .single();
     if (error) throw new Error(error.message);

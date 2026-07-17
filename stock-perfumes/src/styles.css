@@ -261,6 +261,7 @@ input { font-family: inherit; font-size: 16px; } /* 16px evita el zoom de iOS */
 .precio-compra { font-size: 14px; font-weight: 500; }
 .precio-sugerido { font-size: 16px; font-weight: 700; color: var(--ambar-oscuro); }
 .alerta-bajo { margin: 8px 0 0; font-size: 12px; color: var(--rojo); font-weight: 600; }
+.card-cargado { margin: 6px 0 0; font-size: 11px; color: var(--tinta-suave); }
 .card-acciones { display: flex; flex-direction: column; gap: 8px; }
 
 /* ---------- Fotos de producto ---------- */

@@ -8,6 +8,7 @@ export interface Perfume {
   stock: number;
   stock_minimo: number;
   foto_url: string | null;
+  creado_por: string | null;
   creado_en: string;
   actualizado_en: string;
 }

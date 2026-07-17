@@ -81,6 +81,9 @@ export default function PerfumeCard({ perfume, onEditar, onAjustar, onVender }: 
           </div>
         </div>
 
+        {perfume.creado_por && (
+          <p className="card-cargado">Cargado por {perfume.creado_por}</p>
+        )}
         {bajo && <p className="alerta-bajo">Stock bajo · mínimo {perfume.stock_minimo}</p>}
       </div>
 

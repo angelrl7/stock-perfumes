@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "PowerShell(Get-Content \"c:\\\\Users\\\\Usuario\\\\OneDrive\\\\Escritorio\\\\Trabajos de paso\\\\stock-perfumes\\\\stock-perfumes\\\\.env\" | ForEach-Object { \\($_ -split '='\\)[0] })",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(npx tsc *)"
     ]
   }
 }

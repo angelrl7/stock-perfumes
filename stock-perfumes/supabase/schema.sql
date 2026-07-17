@@ -114,3 +114,11 @@ create policy "fotos perfumes subida" on storage.objects
 drop policy if exists "fotos perfumes borrado" on storage.objects;
 create policy "fotos perfumes borrado" on storage.objects
   for delete to authenticated using (bucket_id = 'perfumes');
+
+-- ============================================
+-- QUIÉN CARGÓ cada producto
+-- Si ya corriste los bloques de arriba, podés
+-- pegar SOLO desde acá hasta el final.
+-- ============================================
+
+alter table perfumes add column if not exists creado_por text;

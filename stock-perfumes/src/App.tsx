@@ -4,6 +4,7 @@ import { supabase } from "./lib/supabase";
 import { usePerfumes } from "./hooks/usePerfumes";
 import type { Perfume, TipoMovimiento } from "./types";
 import Login from "./components/Login";
+import NombreForm from "./components/NombreForm";
 import PerfumeCard from "./components/PerfumeCard";
 import PerfumeForm from "./components/PerfumeForm";
 import StockModal from "./components/StockModal";
@@ -57,13 +58,14 @@ export default function App() {
         <Login />
       </>
     );
-  return (
-    <Panel
-      usuario={session.user.email ?? "usuario"}
-      tema={tema}
-      onTema={alternarTema}
-    />
-  );
+
+  const nombre =
+    typeof session.user.user_metadata?.nombre === "string"
+      ? session.user.user_metadata.nombre.trim()
+      : "";
+  if (!nombre) return <NombreForm />;
+
+  return <Panel usuario={nombre} tema={tema} onTema={alternarTema} />;
 }
 
 function Panel({
