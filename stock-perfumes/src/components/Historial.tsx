@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { Movimiento, Venta } from "../types";
+import type { Movimiento, TipoMovimiento, Venta } from "../types";
 import { VentaItem } from "./Ventas";
 
 const ETIQUETAS: Record<string, { texto: string; clase: string; signo: string }> = {
@@ -7,6 +7,14 @@ const ETIQUETAS: Record<string, { texto: string; clase: string; signo: string }>
   venta: { texto: "Venta", clase: "mov-venta", signo: "−" },
   ajuste: { texto: "Ajuste", clase: "mov-ajuste", signo: "−" },
 };
+
+type FiltroMov = TipoMovimiento | "todos";
+
+const FILTROS: { valor: FiltroMov; texto: string }[] = [
+  { valor: "todos", texto: "Todos" },
+  { valor: "venta", texto: "Ventas" },
+  { valor: "entrada", texto: "Entradas" },
+];
 
 function fechaLinda(iso: string): string {
   return new Date(iso).toLocaleString("es-AR", {
@@ -27,6 +35,10 @@ interface Props {
 
 export default function Historial({ movimientos, ventas }: Props) {
   const [seccion, setSeccion] = useState<Seccion>("ventas");
+  const [filtroMov, setFiltroMov] = useState<FiltroMov>("todos");
+
+  const movimientosFiltrados =
+    filtroMov === "todos" ? movimientos : movimientos.filter((m) => m.tipo === filtroMov);
 
   return (
     <>
@@ -59,14 +71,30 @@ export default function Historial({ movimientos, ventas }: Props) {
           </ul>
         ))}
 
+      {seccion === "stock" && movimientos.length > 0 && (
+        <div className="filtro-mov">
+          {FILTROS.map((f) => (
+            <button
+              key={f.valor}
+              className={filtroMov === f.valor ? "activo" : ""}
+              onClick={() => setFiltroMov(f.valor)}
+            >
+              {f.texto}
+            </button>
+          ))}
+        </div>
+      )}
+
       {seccion === "stock" &&
         (movimientos.length === 0 ? (
           <p className="vacio">
             Todavía no hay movimientos. Cuando cargues ventas o entradas van a aparecer acá.
           </p>
+        ) : movimientosFiltrados.length === 0 ? (
+          <p className="vacio">No hay movimientos de este tipo.</p>
         ) : (
           <ul className="historial">
-            {movimientos.map((m) => {
+            {movimientosFiltrados.map((m) => {
               const e = ETIQUETAS[m.tipo] ?? ETIQUETAS.ajuste;
               return (
                 <li key={m.id} className="mov">

@@ -98,7 +98,12 @@ export default function PerfumeForm({ perfume, onGuardar, onEliminar, onCerrar }
   return (
     <div className="modal-fondo" onClick={onCerrar}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <h2>{perfume ? "Editar producto" : "Nuevo producto"}</h2>
+        <div className="modal-cabecera">
+          <h2>{perfume ? "Editar producto" : "Nuevo producto"}</h2>
+          <button className="modal-cerrar" onClick={onCerrar} aria-label="Cerrar">
+            ✕
+          </button>
+        </div>
 
         <div className="campo">
           <span>Foto (opcional)</span>
@@ -136,7 +141,12 @@ export default function PerfumeForm({ perfume, onGuardar, onEliminar, onCerrar }
 
         <label className="campo">
           <span>Nombre</span>
-          <input value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Nombre del producto" />
+          <input
+            value={nombre}
+            onChange={(e) => setNombre(e.target.value)}
+            placeholder="Nombre del producto"
+            autoFocus
+          />
         </label>
 
         <label className="campo">
@@ -177,13 +187,6 @@ export default function PerfumeForm({ perfume, onGuardar, onEliminar, onCerrar }
 
         {error && <p className="error-msg">{error}</p>}
 
-        <div className="modal-botones">
-          <button className="btn-secundario" onClick={onCerrar}>Cancelar</button>
-          <button className="btn-primario" onClick={guardar} disabled={guardando}>
-            {guardando ? "Guardando…" : "Guardar"}
-          </button>
-        </div>
-
         {perfume && onEliminar && (
           <div className="zona-borrado">
             {confirmarBorrado ? (
@@ -199,6 +202,13 @@ export default function PerfumeForm({ perfume, onGuardar, onEliminar, onCerrar }
             )}
           </div>
         )}
+
+        <div className="modal-botones modal-botones-fijo">
+          <button className="btn-secundario" onClick={onCerrar}>Cancelar</button>
+          <button className="btn-primario" onClick={guardar} disabled={guardando}>
+            {guardando ? "Guardando…" : "Guardar"}
+          </button>
+        </div>
       </div>
     </div>
   );

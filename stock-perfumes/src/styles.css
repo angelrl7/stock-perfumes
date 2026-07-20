@@ -5,46 +5,46 @@
    ============================================ */
 
 :root {
-  --marfil: #f6f3ed;
-  --marfil-card: #fdfcf9;
-  --tinta: #1c1917;
-  --tinta-suave: #6b6459;
-  --linea: #e4ddd1;
-  --ambar: #b07d2b;
-  --ambar-oscuro: #8a6222;
-  --rojo: #b3372e;
-  --rojo-fondo: #faeceb;
-  --rojo-borde-suave: #e6c2be;
-  --rojo-fondo-suave: #fdf9f8;
-  --verde: #3d6b45;
-  --verde-fondo: #ecf3ed;
-  --verde-borde: #bcd4c0;
+  --marfil: #f3f3f3;
+  --marfil-card: #fafafa;
+  --tinta: #374258;
+  --tinta-suave: #6a7285;
+  --linea: #c4c4c4;
+  --ambar: #f74464;
+  --ambar-oscuro: #d6395a;
+  --rojo: #f74464;
+  --rojo-fondo: #fde8ec;
+  --rojo-borde-suave: #f6c3cd;
+  --rojo-fondo-suave: #fef5f6;
+  --verde: #4b5568;
+  --verde-fondo: #e8eaee;
+  --verde-borde: #c7ccd6;
   --campo-fondo: #ffffff;
-  --acento-fondo: #f5efe3;
-  --acento-borde: #e9dfc9;
-  --fuente-display: "Fraunces", Georgia, serif;
-  --fuente-texto: "Inter", system-ui, sans-serif;
+  --acento-fondo: #fde8ec;
+  --acento-borde: #f6c3cd;
+  --fuente-display: "Space Grotesk", system-ui, sans-serif;
+  --fuente-texto: "Space Grotesk", system-ui, sans-serif;
   color-scheme: light;
 }
 
 :root[data-tema="oscuro"] {
-  --marfil: #17130f;
-  --marfil-card: #211c17;
-  --tinta: #ede7dc;
-  --tinta-suave: #a2988a;
-  --linea: #38312a;
-  --ambar: #d69a45;
-  --ambar-oscuro: #e2ae63;
-  --rojo: #e07a70;
-  --rojo-fondo: #3a211e;
-  --rojo-borde-suave: #5a332e;
-  --rojo-fondo-suave: #2a1c19;
-  --verde: #8fc099;
-  --verde-fondo: #20301f;
-  --verde-borde: #3c5a3e;
-  --campo-fondo: #2a241e;
-  --acento-fondo: #2d2519;
-  --acento-borde: #4b3d26;
+  --marfil: #374258;
+  --marfil-card: #414c67;
+  --tinta: #f3f3f3;
+  --tinta-suave: #c4c4c4;
+  --linea: #4a5570;
+  --ambar: #f74464;
+  --ambar-oscuro: #ee5678;
+  --rojo: #ee5678;
+  --rojo-fondo: #4a2836;
+  --rojo-borde-suave: #6b3a49;
+  --rojo-fondo-suave: #3d2530;
+  --verde: #a9b2c4;
+  --verde-fondo: #454f68;
+  --verde-borde: #5c6884;
+  --campo-fondo: #2c3548;
+  --acento-fondo: #4a2836;
+  --acento-borde: #6b3a49;
   color-scheme: dark;
 }
 
@@ -107,6 +107,9 @@ input { font-family: inherit; font-size: 16px; } /* 16px evita el zoom de iOS */
 }
 .campo input:disabled { background: var(--marfil); color: var(--tinta-suave); }
 .campos-fila { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 360px) {
+  .campos-fila { grid-template-columns: 1fr; }
+}
 
 /* ---------- Botones ---------- */
 .btn-primario {
@@ -353,8 +356,30 @@ input { font-family: inherit; font-size: 16px; } /* 16px evita el zoom de iOS */
   padding: 24px 20px 28px;
 }
 .modal h2 { font-size: 21px; margin-bottom: 14px; }
+.modal-cabecera { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.modal-cabecera h2 { margin-bottom: 14px; }
+.modal-cerrar {
+  border: none;
+  background: var(--campo-fondo);
+  color: var(--tinta-suave);
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  border-radius: 50%;
+  font-size: 15px;
+  line-height: 1;
+  flex-shrink: 0;
+}
 .modal-sub { color: var(--tinta-suave); font-size: 14px; margin: -8px 0 16px; }
 .modal-botones { display: flex; gap: 10px; margin-top: 6px; }
+.modal-botones-fijo {
+  position: sticky;
+  bottom: -28px;
+  margin: 16px -20px -28px;
+  padding: 14px 20px max(14px, env(safe-area-inset-bottom));
+  background: var(--marfil-card);
+  border-top: 1px solid var(--linea);
+}
 .vista-previa {
   background: var(--acento-fondo);
   border: 1px solid var(--acento-borde);
@@ -493,6 +518,21 @@ input { font-family: inherit; font-size: 16px; } /* 16px evita el zoom de iOS */
   color: var(--tinta-suave);
 }
 .sub-tabs button.activo {
+  border-color: var(--ambar);
+  background: var(--acento-fondo);
+  color: var(--tinta);
+}
+.filtro-mov { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.filtro-mov button {
+  padding: 6px 12px;
+  border: 1px solid var(--linea);
+  border-radius: 99px;
+  background: var(--campo-fondo);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--tinta-suave);
+}
+.filtro-mov button.activo {
   border-color: var(--ambar);
   background: var(--acento-fondo);
   color: var(--tinta);
