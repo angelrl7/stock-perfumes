@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { Perfume, PerfumeInput } from "../types";
-import { formatoARS, precioSugerido } from "../lib/precio";
+import { formatoARS, precioMayorista, precioSugerido } from "../lib/precio";
 import { borrarFoto, comprimirImagen, subirFoto } from "../lib/fotos";
 
 interface Props {
@@ -19,7 +19,7 @@ export default function PerfumeForm({ perfume, onGuardar, onEliminar, onCerrar }
     perfume?.precio_manual ? String(perfume.precio_manual) : ""
   );
   const [stock, setStock] = useState(String(perfume?.stock ?? 0));
-  const [stockMinimo, setStockMinimo] = useState(String(perfume?.stock_minimo ?? 2));
+  const [stockMinimo, setStockMinimo] = useState(String(perfume?.stock_minimo ?? 1));
   const [fotoUrl, setFotoUrl] = useState<string | null>(perfume?.foto_url ?? null);
   const [fotoNueva, setFotoNueva] = useState<Blob | null>(null);
   const [fotoPreview, setFotoPreview] = useState<string | null>(perfume?.foto_url ?? null);
@@ -34,6 +34,7 @@ export default function PerfumeForm({ perfume, onGuardar, onEliminar, onCerrar }
     precio_manual: precioManual ? parseFloat(precioManual) : null,
   };
   const vistaPrevia = precioSugerido(numeros);
+  const vistaPreviaMayorista = precioMayorista(numeros);
 
   const elegirFoto = async (archivo: File | undefined) => {
     if (!archivo) return;
@@ -171,7 +172,8 @@ export default function PerfumeForm({ perfume, onGuardar, onEliminar, onCerrar }
         </label>
 
         <p className="vista-previa">
-          Precio sugerido: <strong>{formatoARS(vistaPrevia)}</strong>
+          Precio final: <strong>{formatoARS(vistaPrevia)}</strong>
+          {" "}· Mayorista (−20%): <strong>{formatoARS(vistaPreviaMayorista)}</strong>
         </p>
 
         <div className="campos-fila">

@@ -11,7 +11,7 @@ create table if not exists perfumes (
   margen numeric not null default 80,          -- % de ganancia para el precio sugerido
   precio_manual numeric,                        -- si se carga, pisa al precio calculado
   stock integer not null default 0,
-  stock_minimo integer not null default 2,      -- debajo de esto se marca en rojo
+  stock_minimo integer not null default 1,      -- debajo de esto se marca en rojo
   creado_en timestamptz not null default now(),
   actualizado_en timestamptz not null default now()
 );
@@ -122,3 +122,27 @@ create policy "fotos perfumes borrado" on storage.objects
 -- ============================================
 
 alter table perfumes add column if not exists creado_por text;
+
+-- ============================================
+-- CAJA COMPARTIDA (movimientos de plata manuales)
+-- Ingresos/retiros que no vienen de una venta, para
+-- la cuenta en común entre todos los usuarios.
+-- Si ya corriste los bloques de arriba, podés
+-- pegar SOLO desde acá hasta el final.
+-- ============================================
+
+create table if not exists caja_movimientos (
+  id uuid primary key default gen_random_uuid(),
+  tipo text not null check (tipo in ('ingreso', 'retiro')),
+  monto numeric not null,
+  descripcion text not null default '',
+  usuario text not null,
+  fecha date not null default current_date,
+  creado_en timestamptz not null default now()
+);
+
+alter table caja_movimientos enable row level security;
+
+drop policy if exists "acceso total autenticados caja" on caja_movimientos;
+create policy "acceso total autenticados caja" on caja_movimientos
+  for all to authenticated using (true) with check (true);

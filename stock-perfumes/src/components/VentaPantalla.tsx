@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { NuevaVenta, Perfume, TipoPago } from "../types";
-import { formatoARS, precioSugerido } from "../lib/precio";
+import { formatoARS, precioMayorista, precioSugerido } from "../lib/precio";
 
 interface Props {
   perfume: Perfume;
@@ -8,11 +8,15 @@ interface Props {
   onCerrar: () => void;
 }
 
-export default function VentaModal({ perfume, onVender, onCerrar }: Props) {
-  const sugerido = precioSugerido(perfume);
+type NivelPrecio = "final" | "mayorista";
+
+export default function VentaPantalla({ perfume, onVender, onCerrar }: Props) {
+  const final = precioSugerido(perfume);
+  const mayorista = precioMayorista(perfume);
+  const [nivelPrecio, setNivelPrecio] = useState<NivelPrecio>("final");
   const [cliente, setCliente] = useState("");
   const [cantidad, setCantidad] = useState("1");
-  const [total, setTotal] = useState(String(sugerido));
+  const [total, setTotal] = useState(String(final));
   const [totalEditado, setTotalEditado] = useState(false);
   const [tipoPago, setTipoPago] = useState<TipoPago>("contado");
   const [entrega, setEntrega] = useState("");
@@ -24,11 +28,18 @@ export default function VentaModal({ perfume, onVender, onCerrar }: Props) {
   const e = parseFloat(entrega) || 0;
   const resultado = perfume.stock - n;
   const saldo = Math.max(0, t - (tipoPago === "contado" ? t : e));
+  const precioUnitario = nivelPrecio === "mayorista" ? mayorista : final;
 
   const cambiarCantidad = (valor: number) => {
     const nuevo = Math.max(1, valor);
     setCantidad(String(nuevo));
-    if (!totalEditado) setTotal(String(sugerido * nuevo));
+    if (!totalEditado) setTotal(String(precioUnitario * nuevo));
+  };
+
+  const elegirNivel = (nivel: NivelPrecio) => {
+    setNivelPrecio(nivel);
+    setTotalEditado(false);
+    setTotal(String((nivel === "mayorista" ? mayorista : final) * n));
   };
 
   const confirmar = async () => {
@@ -56,9 +67,19 @@ export default function VentaModal({ perfume, onVender, onCerrar }: Props) {
   };
 
   return (
-    <div className="modal-fondo" onClick={onCerrar}>
-      <div className="modal" onClick={(ev) => ev.stopPropagation()}>
-        <h2>Nueva venta</h2>
+    <div className="app">
+      <header className="header">
+        <div className="header-titulo">
+          <div className="header-volver">
+            <button className="btn-volver" onClick={onCerrar} aria-label="Volver">
+              ←
+            </button>
+            <h1>Nueva venta</h1>
+          </div>
+        </div>
+      </header>
+
+      <main className="contenido">
         <p className="modal-sub">
           {perfume.nombre} · stock actual: <strong>{perfume.stock}</strong>
         </p>
@@ -72,6 +93,24 @@ export default function VentaModal({ perfume, onVender, onCerrar }: Props) {
             autoFocus
           />
         </label>
+
+        <div className="campo">
+          <span>Precio</span>
+          <div className="tipo-selector">
+            <button
+              className={nivelPrecio === "final" ? "activo" : ""}
+              onClick={() => elegirNivel("final")}
+            >
+              Final · {formatoARS(final)}
+            </button>
+            <button
+              className={nivelPrecio === "mayorista" ? "activo" : ""}
+              onClick={() => elegirNivel("mayorista")}
+            >
+              Mayorista · {formatoARS(mayorista)}
+            </button>
+          </div>
+        </div>
 
         <div className="campos-fila">
           <label className="campo">
@@ -163,7 +202,7 @@ export default function VentaModal({ perfume, onVender, onCerrar }: Props) {
             {guardando ? "Guardando…" : "Registrar venta"}
           </button>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

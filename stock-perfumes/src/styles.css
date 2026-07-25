@@ -82,7 +82,7 @@ input { font-family: inherit; font-size: 16px; } /* 16px evita el zoom de iOS */
   padding: 32px 28px;
 }
 .login-marca { text-align: center; margin-bottom: 24px; }
-.login-flor { color: var(--ambar); font-size: 22px; display: block; margin-bottom: 8px; }
+.login-flor { width: 52px; height: 52px; display: block; margin: 0 auto 10px; border-radius: 13px; }
 .login-marca h1 { font-size: 26px; }
 .login-marca p { color: var(--tinta-suave); font-size: 14px; margin: 6px 0 0; }
 
@@ -178,27 +178,24 @@ input { font-family: inherit; font-size: 16px; } /* 16px evita el zoom de iOS */
   z-index: 10;
 }
 .header-titulo { display: flex; align-items: baseline; justify-content: space-between; }
-.header-titulo h1 { font-size: 22px; }
-.header-flor { color: var(--ambar); font-size: 16px; }
+.header-titulo h1 { font-size: 22px; display: flex; align-items: center; gap: 8px; }
+.header-flor { width: 24px; height: 24px; border-radius: 6px; }
 .header-acciones { display: flex; align-items: center; gap: 12px; }
-.btn-salir {
-  border: none; background: none; color: var(--tinta-suave);
-  font-size: 13px; font-weight: 500; text-decoration: underline;
-}
-.tabs { display: flex; gap: 4px; margin-top: 12px; }
-.tabs button {
-  padding: 10px 12px;
+.header-volver { display: flex; align-items: center; gap: 10px; }
+.btn-volver {
   border: none;
-  background: none;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--tinta-suave);
-  border-bottom: 2px solid transparent;
+  background: var(--campo-fondo);
+  color: var(--tinta);
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  border-radius: 50%;
+  font-size: 18px;
+  line-height: 1;
   display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
 }
-.tabs button.activo { color: var(--tinta); border-bottom-color: var(--ambar); }
 .badge-bajo {
   background: var(--rojo);
   color: #fff;
@@ -234,14 +231,15 @@ input { font-family: inherit; font-size: 16px; } /* 16px evita el zoom de iOS */
 /* ---------- Card ---------- */
 .card {
   display: flex;
+  flex-direction: column;
   gap: 14px;
   background: var(--marfil-card);
   border: 1px solid var(--linea);
   border-radius: 14px;
   padding: 14px;
-  align-items: flex-start;
 }
 .card-bajo { border-color: var(--rojo-borde-suave); background: var(--rojo-fondo-suave); }
+.card-superior { display: flex; gap: 14px; align-items: flex-start; }
 .card-frasco {
   display: flex; flex-direction: column; align-items: center; gap: 2px;
   padding-top: 2px;
@@ -261,11 +259,12 @@ input { font-family: inherit; font-size: 16px; } /* 16px evita el zoom de iOS */
 .card-precios { display: flex; gap: 22px; }
 .card-precios > div { display: flex; flex-direction: column; }
 .precio-label { font-size: 11px; color: var(--tinta-suave); }
-.precio-compra { font-size: 14px; font-weight: 500; }
 .precio-sugerido { font-size: 16px; font-weight: 700; color: var(--ambar-oscuro); }
+.precio-mayorista { font-size: 14px; font-weight: 700; color: var(--tinta); }
 .alerta-bajo { margin: 8px 0 0; font-size: 12px; color: var(--rojo); font-weight: 600; }
 .card-cargado { margin: 6px 0 0; font-size: 11px; color: var(--tinta-suave); }
-.card-acciones { display: flex; flex-direction: column; gap: 8px; }
+.card-acciones { display: flex; gap: 10px; }
+.card-acciones .btn-chico { flex: 1; padding: 10px 8px; text-align: center; }
 
 /* ---------- Fotos de producto ---------- */
 .card-foto {
@@ -565,6 +564,62 @@ input { font-family: inherit; font-size: 16px; } /* 16px evita el zoom de iOS */
 .mov-meta { font-size: 12px; color: var(--tinta-suave); }
 .mov-cantidad { font-weight: 700; font-size: 15px; }
 .mov-cantidad.mov-entrada, .mov-cantidad.mov-venta, .mov-cantidad.mov-ajuste { background: none; padding: 0; }
+
+/* ---------- Finanzas ---------- */
+.fin-in { color: var(--verde); background: var(--verde-fondo); }
+.fin-out { color: var(--rojo); background: var(--rojo-fondo); }
+.mov-cantidad.fin-in, .mov-cantidad.fin-out { background: none; padding: 0; }
+
+.finanzas-resumen {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.finanzas-tarjeta {
+  background: var(--marfil-card);
+  border: 1px solid var(--linea);
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.finanzas-tarjeta-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--tinta-suave);
+  font-weight: 600;
+}
+.finanzas-tarjeta-valor { font-size: 19px; font-weight: 700; }
+.finanzas-btn-mov { margin-bottom: 14px; }
+
+.finanzas-usuarios { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.finanzas-usuario {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--marfil-card);
+  border: 1px solid var(--linea);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+.finanzas-usuario-nombre { font-weight: 600; font-size: 14px; }
+.finanzas-usuario-total { font-weight: 700; font-size: 15px; color: var(--ambar-oscuro); }
+
+.finanzas-meses { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.finanzas-mes {
+  background: var(--marfil-card);
+  border: 1px solid var(--linea);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+.finanzas-mes-cabecera { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.finanzas-mes-etiqueta { font-weight: 700; font-size: 14px; text-transform: capitalize; }
+.finanzas-mes-total { font-weight: 700; font-size: 14px; color: var(--ambar-oscuro); }
+.finanzas-mes-usuarios { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.finanzas-mes-usuarios li { display: flex; justify-content: space-between; font-size: 13px; color: var(--tinta-suave); padding: 2px 0; }
 
 /* ---------- Desktop ---------- */
 @media (min-width: 640px) {

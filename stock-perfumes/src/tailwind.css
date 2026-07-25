@@ -1,0 +1,4 @@
+/* Solo utilidades de Tailwind, sin el reset "preflight": este proyecto ya
+   tiene sus propios estilos base en styles.css y no queremos que choquen. */
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);

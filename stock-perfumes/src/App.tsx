@@ -8,13 +8,15 @@ import NombreForm from "./components/NombreForm";
 import PerfumeCard from "./components/PerfumeCard";
 import PerfumeForm from "./components/PerfumeForm";
 import StockModal from "./components/StockModal";
-import VentaModal from "./components/VentaModal";
+import VentaPantalla from "./components/VentaPantalla";
 import Ventas from "./components/Ventas";
 import Historial from "./components/Historial";
+import Finanzas from "./components/Finanzas";
+import MenuPrincipal from "./components/MenuPrincipal";
 import { estaSaldada } from "./lib/ventas";
 
-type Vista = "stock" | "ventas" | "historial";
-type Tema = "claro" | "oscuro";
+export type Vista = "stock" | "ventas" | "historial" | "finanzas";
+export type Tema = "claro" | "oscuro";
 
 function temaInicial(): Tema {
   const guardado = localStorage.getItem("tema");
@@ -81,6 +83,7 @@ function Panel({
     perfumes,
     movimientos,
     ventas,
+    cajaMovimientos,
     cargando,
     error,
     crear,
@@ -89,6 +92,7 @@ function Panel({
     ajustarStock,
     crearVenta,
     agregarPago,
+    registrarMovimientoCaja,
   } = usePerfumes(usuario);
 
   const [vista, setVista] = useState<Vista>("stock");
@@ -106,33 +110,38 @@ function Panel({
     );
   }, [perfumes, busqueda]);
 
-  const bajos = perfumes.filter((p) => p.stock <= p.stock_minimo).length;
+  const bajos = perfumes.filter((p) => p.stock <= 0).length;
   const pendientes = ventas.filter((v) => !estaSaldada(v));
   const saldadas = ventas.filter(estaSaldada);
+
+  if (vendiendo) {
+    return (
+      <VentaPantalla
+        perfume={vendiendo}
+        onVender={(datos) => crearVenta(vendiendo, datos)}
+        onCerrar={() => setVendiendo(null)}
+      />
+    );
+  }
 
   return (
     <div className="app">
       <header className="header">
         <div className="header-titulo">
-          <h1><span className="header-flor">✦</span> Stock Productos</h1>
+          <h1><img src="/icono.png" alt="" className="header-flor" /> Stock Productos</h1>
           <div className="header-acciones">
-            <button className="btn-tema" onClick={onTema} aria-label="Cambiar tema">
-              {tema === "oscuro" ? "☀️" : "🌙"}
-            </button>
-            <button className="btn-salir" onClick={() => supabase.auth.signOut()}>Salir</button>
+            <MenuPrincipal
+              vista={vista}
+              onVista={setVista}
+              bajos={bajos}
+              pendientes={pendientes.length}
+              tema={tema}
+              onTema={onTema}
+              onAgregarProducto={() => setFormAbierto(true)}
+              onSalir={() => supabase.auth.signOut()}
+            />
           </div>
         </div>
-        <nav className="tabs">
-          <button className={vista === "stock" ? "activo" : ""} onClick={() => setVista("stock")}>
-            Stock{bajos > 0 && <span className="badge-bajo">{bajos}</span>}
-          </button>
-          <button className={vista === "ventas" ? "activo" : ""} onClick={() => setVista("ventas")}>
-            Ventas{pendientes.length > 0 && <span className="badge-deuda">{pendientes.length}</span>}
-          </button>
-          <button className={vista === "historial" ? "activo" : ""} onClick={() => setVista("historial")}>
-            Historial
-          </button>
-        </nav>
       </header>
 
       <main className="contenido">
@@ -181,6 +190,15 @@ function Panel({
         {vista === "historial" && (
           <Historial movimientos={movimientos} ventas={saldadas} />
         )}
+
+        {vista === "finanzas" && (
+          <Finanzas
+            perfumes={perfumes}
+            ventas={ventas}
+            cajaMovimientos={cajaMovimientos}
+            onMovimientoCaja={registrarMovimientoCaja}
+          />
+        )}
       </main>
 
       {formAbierto && (
@@ -206,14 +224,6 @@ function Panel({
             ajustarStock(ajustando, cantidad, tipo)
           }
           onCerrar={() => setAjustando(null)}
-        />
-      )}
-
-      {vendiendo && (
-        <VentaModal
-          perfume={vendiendo}
-          onVender={(datos) => crearVenta(vendiendo, datos)}
-          onCerrar={() => setVendiendo(null)}
         />
       )}
     </div>

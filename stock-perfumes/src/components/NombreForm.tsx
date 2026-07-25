@@ -27,7 +27,7 @@ export default function NombreForm() {
     <div className="login-wrap">
       <div className="login-card">
         <div className="login-marca">
-          <span className="login-flor">✦</span>
+          <img src="/icono.png" alt="" className="login-flor" />
           <h1>¡Bienvenido/a!</h1>
           <p>Decinos tu nombre: va a aparecer en los tickets de venta y en los productos que cargues.</p>
         </div>

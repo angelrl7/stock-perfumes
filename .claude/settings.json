@@ -1,11 +1,19 @@
 {
   "permissions": {
     "allow": [
-      "PowerShell(Get-Content \"c:\\\\Users\\\\Usuario\\\\OneDrive\\\\Escritorio\\\\Trabajos de paso\\\\stock-perfumes\\\\stock-perfumes\\\\.env\" | ForEach-Object { \\($_ -split '='\\)[0] })",
-      "Bash(npm run *)",
+      "Bash(node /tmp/pw-check.js)",
+      "Bash(mkdir -p \"C:\\\\Users\\\\Usuario\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-Usuario-OneDrive-Escritorio-Trabajos-de-paso-stock-perfumes\\\\14f8bf16-cffc-4481-88bf-433b35282746\\\\scratchpad\\\\pw\")",
+      "Bash(npm init *)",
+      "Bash(npm install *)",
+      "Bash(cp /tmp/pw-check.js ./check.js)",
+      "Bash(node check.js)",
+      "Read(//c/Users/Usuario/AppData/Local/Temp/pw-shots/**)",
+      "Bash(node -e \"console.log\\(require\\('path'\\).resolve\\('/tmp/pw-shots'\\)\\)\")",
+      "Read(//c//**)",
+      "Read(//c/tmp/pw-shots/**)",
+      "Bash(curl -sf http://localhost:5173 -o /dev/null)",
       "Bash(npx tsc *)",
-      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" --max-time 5 \"https://fonts.googleapis.com/css2?family=Fraunces&display=swap\")",
-      "Bash(node -e ' *)"
+      "Bash(npm run *)"
     ]
   }
 }

@@ -26,7 +26,7 @@ export default function Login() {
     <div className="login-wrap">
       <div className="login-card">
         <div className="login-marca">
-          <span className="login-flor">✦</span>
+          <img src="/icono.png" alt="" className="login-flor" />
           <h1>Stock Productos</h1>
           <p>Ingresá con tu cuenta para ver el inventario</p>
         </div>

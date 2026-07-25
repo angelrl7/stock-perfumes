@@ -68,3 +68,15 @@ export interface PerfumeInput {
   stock_minimo: number;
   foto_url: string | null;
 }
+
+export type TipoCaja = "ingreso" | "retiro";
+
+export interface MovimientoCaja {
+  id: string;
+  tipo: TipoCaja;
+  monto: number;
+  descripcion: string;
+  usuario: string;
+  fecha: string; // YYYY-MM-DD
+  creado_en: string;
+}

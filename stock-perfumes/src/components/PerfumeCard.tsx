@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { Perfume } from "../types";
-import { formatoARS, precioSugerido } from "../lib/precio";
+import { formatoARS, precioMayorista, precioSugerido } from "../lib/precio";
 
 interface Props {
   perfume: Perfume;
@@ -14,7 +14,7 @@ function Frasquito({ stock, minimo }: { stock: number; minimo: number }) {
   // Lleno = 4 veces el stock mínimo (o al menos 8 unidades de escala)
   const tope = Math.max(minimo * 4, 8);
   const nivel = Math.max(0, Math.min(1, stock / tope));
-  const bajo = stock <= minimo;
+  const sinStock = stock <= 0;
   const alturaLiquido = 30 * nivel; // cuerpo del frasco: 30 de alto
   const y = 46 - alturaLiquido;
 
@@ -32,7 +32,7 @@ function Frasquito({ stock, minimo }: { stock: number; minimo: number }) {
       {/* líquido */}
       <rect
         x="8" y={y} width="18" height={alturaLiquido + 1} rx="4"
-        fill={bajo ? "var(--rojo)" : "var(--ambar)"}
+        fill={sinStock ? "var(--rojo)" : "var(--ambar)"}
         opacity="0.85"
       />
     </svg>
@@ -42,49 +42,52 @@ function Frasquito({ stock, minimo }: { stock: number; minimo: number }) {
 export default function PerfumeCard({ perfume, onEditar, onAjustar, onVender }: Props) {
   const [verFoto, setVerFoto] = useState(false);
   const sugerido = precioSugerido(perfume);
-  const bajo = perfume.stock <= perfume.stock_minimo;
+  const mayorista = precioMayorista(perfume);
+  const sinStock = perfume.stock <= 0;
   const esManual = perfume.precio_manual != null && perfume.precio_manual > 0;
 
   return (
-    <article className={`card ${bajo ? "card-bajo" : ""}`}>
-      <div className="card-frasco">
-        {perfume.foto_url ? (
-          <button
-            className="card-foto"
-            onClick={() => setVerFoto(true)}
-            aria-label={`Ver foto de ${perfume.nombre}`}
-          >
-            <img src={perfume.foto_url} alt={perfume.nombre} loading="lazy" />
-          </button>
-        ) : (
-          <Frasquito stock={perfume.stock} minimo={perfume.stock_minimo} />
-        )}
-        <span className={`card-stock ${bajo ? "stock-bajo" : ""}`}>
-          {perfume.stock}
-        </span>
-      </div>
-
-      <div className="card-info">
-        <p className="card-marca">{perfume.marca || "—"}</p>
-        <h3 className="card-nombre">{perfume.nombre}</h3>
-
-        <div className="card-precios">
-          <div>
-            <span className="precio-label">Compra</span>
-            <span className="precio-compra">{formatoARS(perfume.precio_compra)}</span>
-          </div>
-          <div>
-            <span className="precio-label">
-              Sugerido {esManual ? "· manual" : `· +${perfume.margen}%`}
-            </span>
-            <span className="precio-sugerido">{formatoARS(sugerido)}</span>
-          </div>
+    <article className={`card ${sinStock ? "card-bajo" : ""}`}>
+      <div className="card-superior">
+        <div className="card-frasco">
+          {perfume.foto_url ? (
+            <button
+              className="card-foto"
+              onClick={() => setVerFoto(true)}
+              aria-label={`Ver foto de ${perfume.nombre}`}
+            >
+              <img src={perfume.foto_url} alt={perfume.nombre} loading="lazy" />
+            </button>
+          ) : (
+            <Frasquito stock={perfume.stock} minimo={perfume.stock_minimo} />
+          )}
+          <span className={`card-stock ${sinStock ? "stock-bajo" : ""}`}>
+            {perfume.stock}
+          </span>
         </div>
 
-        {perfume.creado_por && (
-          <p className="card-cargado">Cargado por {perfume.creado_por}</p>
-        )}
-        {bajo && <p className="alerta-bajo">Stock bajo · mínimo {perfume.stock_minimo}</p>}
+        <div className="card-info">
+          <p className="card-marca">{perfume.marca || "—"}</p>
+          <h3 className="card-nombre">{perfume.nombre}</h3>
+
+          <div className="card-precios">
+            <div>
+              <span className="precio-label">
+                Final {esManual ? "· manual" : `· +${perfume.margen}%`}
+              </span>
+              <span className="precio-sugerido">{formatoARS(sugerido)}</span>
+            </div>
+            <div>
+              <span className="precio-label">Mayorista</span>
+              <span className="precio-mayorista">{formatoARS(mayorista)}</span>
+            </div>
+          </div>
+
+          {perfume.creado_por && (
+            <p className="card-cargado">Cargado por {perfume.creado_por}</p>
+          )}
+          {sinStock && <p className="alerta-bajo">Sin stock</p>}
+        </div>
       </div>
 
       <div className="card-acciones">

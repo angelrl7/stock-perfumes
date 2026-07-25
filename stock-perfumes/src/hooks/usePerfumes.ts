@@ -4,9 +4,11 @@ import { hoyISO } from "../lib/fecha";
 import { borrarFoto } from "../lib/fotos";
 import type {
   Movimiento,
+  MovimientoCaja,
   NuevaVenta,
   Perfume,
   PerfumeInput,
+  TipoCaja,
   TipoMovimiento,
   Venta,
 } from "../types";
@@ -15,13 +17,14 @@ export function usePerfumes(usuario: string) {
   const [perfumes, setPerfumes] = useState<Perfume[]>([]);
   const [movimientos, setMovimientos] = useState<Movimiento[]>([]);
   const [ventas, setVentas] = useState<Venta[]>([]);
+  const [cajaMovimientos, setCajaMovimientos] = useState<MovimientoCaja[]>([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const cargar = useCallback(async () => {
     setCargando(true);
     setError(null);
-    const [pRes, mRes, vRes] = await Promise.all([
+    const [pRes, mRes, vRes, cRes] = await Promise.all([
       supabase.from("perfumes").select("*").order("nombre"),
       supabase
         .from("movimientos")
@@ -31,6 +34,11 @@ export function usePerfumes(usuario: string) {
       supabase
         .from("ventas")
         .select("*, pagos(*)")
+        .order("creado_en", { ascending: false })
+        .limit(200),
+      supabase
+        .from("caja_movimientos")
+        .select("*")
         .order("creado_en", { ascending: false })
         .limit(200),
     ]);
@@ -46,6 +54,8 @@ export function usePerfumes(usuario: string) {
           pagos: [...(v.pagos ?? [])].sort((a, b) => a.fecha.localeCompare(b.fecha)),
         }))
       );
+    if (cRes.error) setError(cRes.error.message);
+    else setCajaMovimientos(cRes.data as MovimientoCaja[]);
     setCargando(false);
   }, []);
 
@@ -177,10 +187,29 @@ export function usePerfumes(usuario: string) {
     await cargar();
   };
 
+  const registrarMovimientoCaja = async (
+    tipo: TipoCaja,
+    monto: number,
+    descripcion: string,
+    fecha: string
+  ) => {
+    if (monto <= 0) throw new Error("El monto tiene que ser mayor a 0.");
+    const { error } = await supabase.from("caja_movimientos").insert({
+      tipo,
+      monto,
+      descripcion: descripcion.trim(),
+      fecha,
+      usuario,
+    });
+    if (error) throw new Error(error.message);
+    await cargar();
+  };
+
   return {
     perfumes,
     movimientos,
     ventas,
+    cajaMovimientos,
     cargando,
     error,
     recargar: cargar,
@@ -190,5 +219,6 @@ export function usePerfumes(usuario: string) {
     ajustarStock,
     crearVenta,
     agregarPago,
+    registrarMovimientoCaja,
   };
 }
