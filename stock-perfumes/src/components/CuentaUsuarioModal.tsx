@@ -7,6 +7,8 @@ interface Props {
   usuario: string;
   esPropia: boolean;
   saldo: number;
+  cobrado: number;
+  fiado: number;
   movimientos: MovimientoCaja[];
   onDescontar: (monto: number, descripcion: string, fecha: string) => Promise<void>;
   onCerrar: () => void;
@@ -16,6 +18,8 @@ export default function CuentaUsuarioModal({
   usuario,
   esPropia,
   saldo,
+  cobrado,
+  fiado,
   movimientos,
   onDescontar,
   onCerrar,
@@ -57,6 +61,17 @@ export default function CuentaUsuarioModal({
         <p className="modal-sub">
           Saldo disponible: <strong>{formatoARS(saldo)}</strong>
         </p>
+
+        <div className="cuenta-desglose">
+          <div>
+            <span className="finanzas-tarjeta-label">Cobrado</span>
+            <span className="fin-in-texto">{formatoARS(cobrado)}</span>
+          </div>
+          <div>
+            <span className="finanzas-tarjeta-label">Fiado</span>
+            <span className="fin-out-texto">{formatoARS(fiado)}</span>
+          </div>
+        </div>
 
         {esPropia &&
           (formAbierto ? (

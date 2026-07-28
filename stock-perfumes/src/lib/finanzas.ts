@@ -6,6 +6,52 @@ export function capitalEnStock(perfumes: { precio_compra: number; stock: number 
   return perfumes.reduce((suma, p) => suma + p.precio_compra * p.stock, 0);
 }
 
+export interface Ganancia {
+  monto: number;
+  porcentaje: number;
+}
+
+export interface GananciaDeUsuario extends Ganancia {
+  usuario: string;
+}
+
+/**
+ * Ganancia bruta por usuario: total vendido menos el costo de lo vendido, usando
+ * el precio de compra ACTUAL de cada producto (las ventas no guardan un costo
+ * histórico; si el producto ya se borró, esa venta no suma costo al cálculo).
+ * De mayor a menor ganancia.
+ */
+export function gananciaPorUsuario(
+  ventas: Venta[],
+  perfumes: { id: string; precio_compra: number }[]
+): GananciaDeUsuario[] {
+  const costoPorId = new Map(perfumes.map((p) => [p.id, p.precio_compra]));
+  const mapa = new Map<string, { vendido: number; costo: number }>();
+  for (const v of ventas) {
+    const actual = mapa.get(v.usuario) ?? { vendido: 0, costo: 0 };
+    actual.vendido += v.total;
+    actual.costo += (v.perfume_id ? costoPorId.get(v.perfume_id) ?? 0 : 0) * v.cantidad;
+    mapa.set(v.usuario, actual);
+  }
+  return [...mapa.entries()]
+    .map(([usuario, { vendido, costo }]) => {
+      const monto = vendido - costo;
+      return { usuario, monto, porcentaje: vendido > 0 ? (monto / vendido) * 100 : 0 };
+    })
+    .sort((a, b) => b.monto - a.monto);
+}
+
+/** Ganancia bruta total (todos los usuarios combinados). Ver {@link gananciaPorUsuario}. */
+export function gananciaTotal(
+  ventas: Venta[],
+  perfumes: { id: string; precio_compra: number }[]
+): Ganancia {
+  const porUsuario = gananciaPorUsuario(ventas, perfumes);
+  const monto = porUsuario.reduce((suma, g) => suma + g.monto, 0);
+  const totalVendido = ventas.reduce((suma, v) => suma + v.total, 0);
+  return { monto, porcentaje: totalVendido > 0 ? (monto / totalVendido) * 100 : 0 };
+}
+
 export interface TotalPorUsuario {
   usuario: string;
   total: number;
@@ -121,6 +167,32 @@ export function saldoIndividual(
   return cobrado + ajuste;
 }
 
+export interface CobradoYFiado {
+  cobrado: number;
+  fiado: number;
+}
+
+/** De las ventas propias de un usuario: cuánto está cobrado y cuánto sigue fiado. */
+export function cobradoYFiadoDeUsuario(usuario: string, ventas: Venta[]): CobradoYFiado {
+  const propias = ventas.filter((v) => v.usuario === usuario);
+  return {
+    cobrado: propias.reduce((suma, v) => suma + totalPagado(v), 0),
+    fiado: propias.reduce((suma, v) => suma + Math.max(0, v.total - totalPagado(v)), 0),
+  };
+}
+
+/** Plata fiada (todavía no cobrada) por cada usuario, de mayor a menor. */
+export function fiadoPorUsuario(ventas: Venta[]): TotalPorUsuario[] {
+  const mapa = new Map<string, number>();
+  for (const v of ventas) {
+    const debe = Math.max(0, v.total - totalPagado(v));
+    if (debe > 0) mapa.set(v.usuario, (mapa.get(v.usuario) ?? 0) + debe);
+  }
+  return [...mapa.entries()]
+    .map(([usuario, total]) => ({ usuario, total }))
+    .sort((a, b) => b.total - a.total);
+}
+
 export interface MesVentas {
   mes: string; // "2026-07"
   etiqueta: string; // "Julio 2026"
@@ -158,20 +230,21 @@ export function ventasPorMes(ventas: Venta[]): MesVentas[] {
     .sort((a, b) => b.mes.localeCompare(a.mes));
 }
 
-/** Ventas de un mes puntual ("2026-07"), de la más vieja a la más nueva. */
-export function ventasDelMes(mes: string, ventas: Venta[]): Venta[] {
+/** Ventas de un mes puntual ("2026-07"), opcionalmente de un solo usuario, de la más vieja a la más nueva. */
+export function ventasDelMes(mes: string, ventas: Venta[], usuario?: string): Venta[] {
   return ventas
-    .filter((v) => v.creado_en.slice(0, 7) === mes)
+    .filter((v) => v.creado_en.slice(0, 7) === mes && (!usuario || v.usuario === usuario))
     .sort((a, b) => a.creado_en.localeCompare(b.creado_en));
 }
 
-/** Movimientos de caja (cobros + manuales) de un mes puntual, del más viejo al más nuevo. */
+/** Movimientos de caja (cobros + manuales) de un mes puntual, opcionalmente de un solo usuario. */
 export function movimientosCajaDelMes(
   mes: string,
   ventas: Venta[],
-  cajaMovimientos: MovimientoCaja[]
+  cajaMovimientos: MovimientoCaja[],
+  usuario?: string
 ): MovimientoCajaUnificado[] {
   return movimientosCaja(ventas, cajaMovimientos)
-    .filter((m) => m.fecha.slice(0, 7) === mes)
+    .filter((m) => m.fecha.slice(0, 7) === mes && (!usuario || m.usuario === usuario))
     .sort((a, b) => a.fecha.localeCompare(b.fecha));
 }

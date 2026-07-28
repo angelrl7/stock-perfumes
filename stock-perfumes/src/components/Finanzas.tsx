@@ -1,10 +1,15 @@
 import { useState } from "react";
+import { ChevronDown } from "lucide-react";
 import type { MovimientoCaja, Perfume, TipoCaja, Venta } from "../types";
 import { formatoARS } from "../lib/precio";
 import { fechaCorta } from "../lib/fecha";
 import { totalPagado } from "../lib/ventas";
 import {
   capitalEnStock,
+  cobradoYFiadoDeUsuario,
+  fiadoPorUsuario,
+  gananciaPorUsuario,
+  gananciaTotal,
   movimientosCaja,
   movimientosCajaDelMes,
   movimientosDeUsuario,
@@ -13,6 +18,7 @@ import {
   ventasDelMes,
   ventasPorMes,
   ventasPorUsuarioDetalle,
+  type VentasDeUsuario,
 } from "../lib/finanzas";
 import { compartirReporteMensual } from "../lib/reporteMensual";
 import CajaModal from "./CajaModal";
@@ -48,6 +54,46 @@ function fechaLinda(iso: string): string {
   });
 }
 
+function CajaUsuarioVentas({ datos }: { datos: VentasDeUsuario }) {
+  const [abierto, setAbierto] = useState(false);
+
+  return (
+    <li className="finanzas-usuario-caja">
+      <button
+        className="finanzas-usuario-cabecera"
+        onClick={() => setAbierto((a) => !a)}
+        aria-expanded={abierto}
+      >
+        <span className="finanzas-usuario-nombre">{datos.usuario}</span>
+        <span className="finanzas-usuario-cabecera-derecha">
+          <span className="finanzas-usuario-total">{formatoARS(datos.total)}</span>
+          <ChevronDown
+            size={16}
+            className={`finanzas-usuario-chevron ${abierto ? "abierto" : ""}`}
+          />
+        </span>
+      </button>
+
+      {abierto && (
+        <ul className="finanzas-usuario-ventas">
+          {datos.ventas.map((v) => (
+            <li key={v.id}>
+              <div className="finanzas-usuario-venta-info">
+                <span className="finanzas-usuario-venta-cliente">{v.cliente}</span>
+                <span className="finanzas-usuario-venta-meta">
+                  {v.perfume_nombre}
+                  {v.cantidad > 1 ? ` ×${v.cantidad}` : ""} · {fechaLinda(v.creado_en)}
+                </span>
+              </div>
+              <strong>{formatoARS(v.total)}</strong>
+            </li>
+          ))}
+        </ul>
+      )}
+    </li>
+  );
+}
+
 export default function Finanzas({
   usuarioActual,
   perfumes,
@@ -58,18 +104,26 @@ export default function Finanzas({
   const [seccion, setSeccion] = useState<Seccion>("caja");
   const [modalAbierto, setModalAbierto] = useState(false);
   const [cuentaAbierta, setCuentaAbierta] = useState<string | null>(null);
+  const [plataCalleAbierta, setPlataCalleAbierta] = useState(false);
+  const [gananciaAbierta, setGananciaAbierta] = useState(false);
   const [generandoMes, setGenerandoMes] = useState<string | null>(null);
   const [errorPdf, setErrorPdf] = useState<string | null>(null);
+  const [filtroPorMes, setFiltroPorMes] = useState<Record<string, string>>({});
 
-  const descargarMes = async (mesId: string, etiqueta: string) => {
+  const descargarMes = async (mesId: string, etiqueta: string, usuarioFiltro: string) => {
     setGenerandoMes(mesId);
     setErrorPdf(null);
     try {
+      const usuario = usuarioFiltro || undefined;
+      const etiquetaFinal = usuario ? `${etiqueta} · ${usuario}` : etiqueta;
+      const idArchivo = usuario
+        ? `${mesId}-${usuario.trim().replace(/\s+/g, "-").toLowerCase()}`
+        : mesId;
       await compartirReporteMensual(
-        mesId,
-        etiqueta,
-        ventasDelMes(mesId, ventas),
-        movimientosCajaDelMes(mesId, ventas, cajaMovimientos)
+        idArchivo,
+        etiquetaFinal,
+        ventasDelMes(mesId, ventas, usuario),
+        movimientosCajaDelMes(mesId, ventas, cajaMovimientos, usuario)
       );
     } catch (e) {
       setErrorPdf(e instanceof Error ? e.message : "No se pudo generar el PDF.");
@@ -91,6 +145,9 @@ export default function Finanzas({
     ) + plataEnLaCalle;
   const ledger = movimientosCaja(ventas, cajaMovimientos);
   const meses = ventasPorMes(ventas);
+  const fiadoUsuarios = fiadoPorUsuario(ventas);
+  const ganancia = gananciaTotal(ventas, perfumes);
+  const gananciaUsuarios = gananciaPorUsuario(ventas, perfumes);
 
   return (
     <>
@@ -103,10 +160,19 @@ export default function Finanzas({
           <span className="finanzas-tarjeta-label">Capital en stock</span>
           <span className="finanzas-tarjeta-valor">{formatoARS(capital)}</span>
         </div>
-        <div className="finanzas-tarjeta">
+        <button className="finanzas-tarjeta" onClick={() => setGananciaAbierta(true)}>
+          <span className="finanzas-tarjeta-label">Ganancia</span>
+          <span className="finanzas-tarjeta-valor">
+            {formatoARS(ganancia.monto)}{" "}
+            <span className="finanzas-tarjeta-porcentaje">
+              ({Math.round(ganancia.porcentaje)}%)
+            </span>
+          </span>
+        </button>
+        <button className="finanzas-tarjeta" onClick={() => setPlataCalleAbierta(true)}>
           <span className="finanzas-tarjeta-label">Plata en la calle</span>
-          <span className="finanzas-tarjeta-valor">{formatoARS(plataEnLaCalle)}</span>
-        </div>
+          <span className="finanzas-tarjeta-valor texto-rojo">{formatoARS(plataEnLaCalle)}</span>
+        </button>
         <div className="finanzas-tarjeta finanzas-tarjeta-gris">
           <span className="finanzas-tarjeta-label">Total de las ventas</span>
           <span className="finanzas-tarjeta-valor">{formatoARS(totalDeVentas)}</span>
@@ -178,26 +244,7 @@ export default function Finanzas({
         ) : (
           <ul className="finanzas-usuarios">
             {porUsuario.map((u) => (
-              <li key={u.usuario} className="finanzas-usuario-caja">
-                <div className="finanzas-usuario-cabecera">
-                  <span className="finanzas-usuario-nombre">{u.usuario}</span>
-                  <span className="finanzas-usuario-total">{formatoARS(u.total)}</span>
-                </div>
-                <ul className="finanzas-usuario-ventas">
-                  {u.ventas.map((v) => (
-                    <li key={v.id}>
-                      <div className="finanzas-usuario-venta-info">
-                        <span className="finanzas-usuario-venta-cliente">{v.cliente}</span>
-                        <span className="finanzas-usuario-venta-meta">
-                          {v.perfume_nombre}
-                          {v.cantidad > 1 ? ` ×${v.cantidad}` : ""} · {fechaLinda(v.creado_en)}
-                        </span>
-                      </div>
-                      <strong>{formatoARS(v.total)}</strong>
-                    </li>
-                  ))}
-                </ul>
-              </li>
+              <CajaUsuarioVentas key={u.usuario} datos={u} />
             ))}
           </ul>
         ))}
@@ -209,29 +256,53 @@ export default function Finanzas({
           <>
             {errorPdf && <p className="error-msg">{errorPdf}</p>}
             <ul className="finanzas-meses">
-              {meses.map((mes) => (
-                <li key={mes.mes} className="finanzas-mes">
-                  <div className="finanzas-mes-cabecera">
-                    <span className="finanzas-mes-etiqueta">{mes.etiqueta}</span>
-                    <span className="finanzas-mes-total">{formatoARS(mes.total)}</span>
-                  </div>
-                  <ul className="finanzas-mes-usuarios">
-                    {mes.porUsuario.map((u) => (
-                      <li key={u.usuario}>
-                        <span>{u.usuario}</span>
-                        <span>{formatoARS(u.total)}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <button
-                    className="btn-chico finanzas-mes-pdf"
-                    onClick={() => descargarMes(mes.mes, mes.etiqueta)}
-                    disabled={generandoMes === mes.mes}
-                  >
-                    {generandoMes === mes.mes ? "Generando…" : "🧾 Descargar PDF"}
-                  </button>
-                </li>
-              ))}
+              {meses.map((mes) => {
+                const usuarioFiltro = filtroPorMes[mes.mes] ?? "";
+                return (
+                  <li key={mes.mes} className="finanzas-mes">
+                    <div className="finanzas-mes-cabecera">
+                      <span className="finanzas-mes-etiqueta">{mes.etiqueta}</span>
+                      <span className="finanzas-mes-total">{formatoARS(mes.total)}</span>
+                    </div>
+                    <ul className="finanzas-mes-usuarios">
+                      {mes.porUsuario.map((u) => (
+                        <li key={u.usuario}>
+                          <span>{u.usuario}</span>
+                          <span>{formatoARS(u.total)}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    <p className="finanzas-mes-pdf-label">Descargar PDF de:</p>
+                    <div className="filtro-mov">
+                      <button
+                        className={usuarioFiltro === "" ? "activo" : ""}
+                        onClick={() => setFiltroPorMes((f) => ({ ...f, [mes.mes]: "" }))}
+                      >
+                        Todos
+                      </button>
+                      {mes.porUsuario.map((u) => (
+                        <button
+                          key={u.usuario}
+                          className={usuarioFiltro === u.usuario ? "activo" : ""}
+                          onClick={() =>
+                            setFiltroPorMes((f) => ({ ...f, [mes.mes]: u.usuario }))
+                          }
+                        >
+                          {u.usuario}
+                        </button>
+                      ))}
+                    </div>
+                    <button
+                      className="btn-chico finanzas-mes-pdf"
+                      onClick={() => descargarMes(mes.mes, mes.etiqueta, usuarioFiltro)}
+                      disabled={generandoMes === mes.mes}
+                    >
+                      {generandoMes === mes.mes ? "Generando…" : "🧾 Descargar PDF"}
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
           </>
         ))}
@@ -249,12 +320,85 @@ export default function Finanzas({
           usuario={cuentaAbierta}
           esPropia={cuentaAbierta === usuarioActual}
           saldo={saldoIndividual(cuentaAbierta, ventas, cajaMovimientos)}
+          {...cobradoYFiadoDeUsuario(cuentaAbierta, ventas)}
           movimientos={movimientosDeUsuario(cuentaAbierta, cajaMovimientos)}
           onDescontar={(monto, descripcion, fecha) =>
             onMovimientoCaja("retiro", monto, descripcion, fecha)
           }
           onCerrar={() => setCuentaAbierta(null)}
         />
+      )}
+
+      {plataCalleAbierta && (
+        <div className="modal-fondo" onClick={() => setPlataCalleAbierta(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-cabecera">
+              <h2>Plata en la calle</h2>
+              <button
+                className="modal-cerrar"
+                onClick={() => setPlataCalleAbierta(false)}
+                aria-label="Cerrar"
+              >
+                ✕
+              </button>
+            </div>
+            <p className="modal-sub">
+              Total fiado: <strong className="texto-rojo">{formatoARS(plataEnLaCalle)}</strong>
+            </p>
+
+            {fiadoUsuarios.length === 0 ? (
+              <p className="vacio">No hay deuda pendiente de ningún usuario.</p>
+            ) : (
+              <ul className="desglose-usuarios">
+                {fiadoUsuarios.map((u) => (
+                  <li key={u.usuario} className="desglose-fila">
+                    <span className="desglose-nombre">{u.usuario}</span>
+                    <span className="desglose-monto fin-out-texto">{formatoARS(u.total)}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      )}
+
+      {gananciaAbierta && (
+        <div className="modal-fondo" onClick={() => setGananciaAbierta(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-cabecera">
+              <h2>Ganancia</h2>
+              <button
+                className="modal-cerrar"
+                onClick={() => setGananciaAbierta(false)}
+                aria-label="Cerrar"
+              >
+                ✕
+              </button>
+            </div>
+            <p className="modal-sub">
+              Total: <strong>{formatoARS(ganancia.monto)}</strong> (
+              {Math.round(ganancia.porcentaje)}%)
+            </p>
+
+            {gananciaUsuarios.length === 0 ? (
+              <p className="vacio">Todavía no hay ventas registradas.</p>
+            ) : (
+              <ul className="desglose-usuarios">
+                {gananciaUsuarios.map((u) => (
+                  <li key={u.usuario} className="desglose-fila">
+                    <span className="desglose-nombre">{u.usuario}</span>
+                    <span className={`desglose-monto ${u.monto < 0 ? "fin-out-texto" : "fin-in-texto"}`}>
+                      {formatoARS(u.monto)}{" "}
+                      <span className="finanzas-tarjeta-porcentaje">
+                        ({Math.round(u.porcentaje)}%)
+                      </span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
       )}
     </>
   );
