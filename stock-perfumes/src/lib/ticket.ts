@@ -3,6 +3,7 @@ import type { Venta } from "../types";
 import { formatoARS } from "./precio";
 import { fechaCorta } from "./fecha";
 import { totalPagado } from "./ventas";
+import { compartirOGuardarPDF } from "./pdf";
 
 const ANCHO = 80; // mm, tamaño de ticket de impresora térmica
 const IZQ = 8;
@@ -113,17 +114,5 @@ export async function compartirTicketPDF(venta: Venta): Promise<void> {
   const doc = construirTicket(venta);
   const cliente = venta.cliente.trim().replace(/\s+/g, "-").toLowerCase() || "cliente";
   const nombre = `ticket-${cliente}-${venta.creado_en.slice(0, 10)}.pdf`;
-
-  const blob = doc.output("blob");
-  const archivo = new File([blob], nombre, { type: "application/pdf" });
-  if (typeof navigator.canShare === "function" && navigator.canShare({ files: [archivo] })) {
-    try {
-      await navigator.share({ files: [archivo], title: "Ticket de venta" });
-      return;
-    } catch (err) {
-      // Si el usuario cerró el menú de compartir, no hacemos nada más
-      if (err instanceof DOMException && err.name === "AbortError") return;
-    }
-  }
-  doc.save(nombre);
+  await compartirOGuardarPDF(doc, nombre);
 }

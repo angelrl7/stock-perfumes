@@ -6,12 +6,15 @@ import {
   History,
   Banknote,
   Plus,
+  Download,
   Sun,
   Moon,
   LogOut,
   type LucideProps,
 } from "lucide-react";
 import type { Tema, Vista } from "../App";
+import type { Perfume } from "../types";
+import { compartirListaPrecios } from "../lib/listaPrecios";
 
 interface Props {
   vista: Vista;
@@ -20,6 +23,7 @@ interface Props {
   pendientes: number;
   tema: Tema;
   onTema: () => void;
+  perfumes: Perfume[];
   onAgregarProducto: () => void;
   onSalir: () => void;
 }
@@ -43,6 +47,7 @@ export default function MenuPrincipal({
   pendientes,
   tema,
   onTema,
+  perfumes,
   onAgregarProducto,
   onSalir,
 }: Props) {
@@ -126,6 +131,17 @@ export default function MenuPrincipal({
           >
             <Plus size={18} className="text-[var(--ambar)]" />
             Agregar producto
+          </button>
+
+          <button
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-[var(--tinta)] transition-colors hover:bg-[var(--acento-fondo)]"
+            onClick={() => {
+              compartirListaPrecios(perfumes);
+              setAbierto(false);
+            }}
+          >
+            <Download size={18} className="text-[var(--ambar)]" />
+            Lista de precios (PDF)
           </button>
 
           <button

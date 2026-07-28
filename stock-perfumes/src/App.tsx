@@ -137,6 +137,7 @@ function Panel({
               pendientes={pendientes.length}
               tema={tema}
               onTema={onTema}
+              perfumes={perfumes}
               onAgregarProducto={() => setFormAbierto(true)}
               onSalir={() => supabase.auth.signOut()}
             />
@@ -193,6 +194,7 @@ function Panel({
 
         {vista === "finanzas" && (
           <Finanzas
+            usuarioActual={usuario}
             perfumes={perfumes}
             ventas={ventas}
             cajaMovimientos={cajaMovimientos}

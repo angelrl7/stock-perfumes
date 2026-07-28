@@ -22,6 +22,7 @@
   --campo-fondo: #ffffff;
   --acento-fondo: #fde8ec;
   --acento-borde: #f6c3cd;
+  --gris-tarjeta: #e6e6e6;
   --fuente-display: "Space Grotesk", system-ui, sans-serif;
   --fuente-texto: "Space Grotesk", system-ui, sans-serif;
   color-scheme: light;
@@ -45,6 +46,7 @@
   --campo-fondo: #2c3548;
   --acento-fondo: #4a2836;
   --acento-borde: #6b3a49;
+  --gris-tarjeta: #5a6478;
   color-scheme: dark;
 }
 
@@ -387,6 +389,7 @@ input { font-family: inherit; font-size: 16px; } /* 16px evita el zoom de iOS */
   font-size: 14px;
   margin: 0 0 14px;
 }
+.cuenta-subtitulo { font-weight: 700; font-size: 14px; margin: 18px 0 8px; }
 .vista-previa strong { color: var(--ambar-oscuro); font-size: 16px; }
 .vista-previa strong.texto-rojo { color: var(--rojo); }
 .zona-borrado { margin-top: 18px; border-top: 1px solid var(--linea); padding-top: 14px; }
@@ -593,20 +596,32 @@ input { font-family: inherit; font-size: 16px; } /* 16px evita el zoom de iOS */
   font-weight: 600;
 }
 .finanzas-tarjeta-valor { font-size: 19px; font-weight: 700; }
+.finanzas-tarjeta-gris { background: var(--gris-tarjeta); }
 .finanzas-btn-mov { margin-bottom: 14px; }
 
-.finanzas-usuarios { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
-.finanzas-usuario {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.finanzas-usuarios { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.finanzas-usuario-caja {
   background: var(--marfil-card);
   border: 1px solid var(--linea);
   border-radius: 12px;
   padding: 12px 14px;
 }
-.finanzas-usuario-nombre { font-weight: 600; font-size: 14px; }
+.finanzas-usuario-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 10px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--linea);
+}
+.finanzas-usuario-nombre { font-weight: 700; font-size: 15px; }
 .finanzas-usuario-total { font-weight: 700; font-size: 15px; color: var(--ambar-oscuro); }
+.finanzas-usuario-ventas { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.finanzas-usuario-ventas li { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.finanzas-usuario-ventas li strong { font-size: 14px; font-weight: 700; white-space: nowrap; }
+.finanzas-usuario-venta-info { display: flex; flex-direction: column; min-width: 0; }
+.finanzas-usuario-venta-cliente { font-weight: 600; font-size: 13px; }
+.finanzas-usuario-venta-meta { font-size: 11px; color: var(--tinta-suave); }
 
 .finanzas-meses { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
 .finanzas-mes {
@@ -620,6 +635,7 @@ input { font-family: inherit; font-size: 16px; } /* 16px evita el zoom de iOS */
 .finanzas-mes-total { font-weight: 700; font-size: 14px; color: var(--ambar-oscuro); }
 .finanzas-mes-usuarios { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
 .finanzas-mes-usuarios li { display: flex; justify-content: space-between; font-size: 13px; color: var(--tinta-suave); padding: 2px 0; }
+.finanzas-mes-pdf { margin-top: 10px; width: 100%; text-align: center; }
 
 /* ---------- Desktop ---------- */
 @media (min-width: 640px) {
