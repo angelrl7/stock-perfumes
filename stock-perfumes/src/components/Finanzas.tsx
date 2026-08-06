@@ -138,11 +138,8 @@ export default function Finanzas({
     0
   );
   const porUsuario = ventasPorUsuarioDetalle(ventas);
-  const totalDeVentas =
-    porUsuario.reduce(
-      (suma, u) => suma + saldoIndividual(u.usuario, ventas, cajaMovimientos),
-      0
-    ) + plataEnLaCalle;
+  // Lo facturado, sin descontar los movimientos de caja: un retiro baja la caja, no las ventas.
+  const totalDeVentas = porUsuario.reduce((suma, u) => suma + u.total, 0);
   const ledger = movimientosCaja(ventas, cajaMovimientos);
   const meses = ventasPorMes(ventas);
   const fiadoUsuarios = fiadoPorUsuario(ventas);
