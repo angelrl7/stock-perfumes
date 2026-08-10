@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Pencil } from "lucide-react";
 import type { Perfume } from "../types";
 import { formatoARS, precioMayorista, precioSugerido } from "../lib/precio";
 
@@ -59,15 +60,23 @@ export default function PerfumeCard({ perfume, onEditar, onAjustar, onVender }: 
               <img src={perfume.foto_url} alt={perfume.nombre} loading="lazy" />
             </button>
           ) : (
-            <Frasquito stock={perfume.stock} minimo={perfume.stock_minimo} />
+            <div className="card-frasco-caja">
+              <Frasquito stock={perfume.stock} minimo={perfume.stock_minimo} />
+            </div>
           )}
-          <span className={`card-stock ${sinStock ? "stock-bajo" : ""}`}>
+          <span
+            className={`card-stock ${sinStock ? "stock-bajo" : ""}`}
+            title={`${perfume.stock} en stock`}
+          >
             {perfume.stock}
           </span>
         </div>
 
         <div className="card-info">
-          <p className="card-marca">{perfume.marca || "—"}</p>
+          <div className="card-marca-fila">
+            <p className="card-marca">{perfume.marca || "—"}</p>
+            {sinStock && <span className="chip-sin-stock">Sin stock</span>}
+          </div>
           <h3 className="card-nombre">{perfume.nombre}</h3>
 
           <div className="card-precios">
@@ -86,7 +95,6 @@ export default function PerfumeCard({ perfume, onEditar, onAjustar, onVender }: 
           {perfume.creado_por && (
             <p className="card-cargado">Cargado por {perfume.creado_por}</p>
           )}
-          {sinStock && <p className="alerta-bajo">Sin stock</p>}
         </div>
       </div>
 
@@ -99,7 +107,14 @@ export default function PerfumeCard({ perfume, onEditar, onAjustar, onVender }: 
           Vender
         </button>
         <button className="btn-chico btn-ajustar" onClick={onAjustar}>± Stock</button>
-        <button className="btn-chico" onClick={onEditar}>Editar</button>
+        <button
+          className="btn-chico btn-editar-icono"
+          onClick={onEditar}
+          aria-label={`Editar ${perfume.nombre}`}
+          title="Editar"
+        >
+          <Pencil size={16} strokeWidth={2} aria-hidden="true" />
+        </button>
       </div>
 
       {verFoto && perfume.foto_url && (

@@ -13,6 +13,7 @@ import Ventas from "./components/Ventas";
 import Historial from "./components/Historial";
 import Finanzas from "./components/Finanzas";
 import MenuPrincipal from "./components/MenuPrincipal";
+import AvisoPago from "./components/AvisoPago";
 import { estaSaldada } from "./lib/ventas";
 
 export type Vista = "stock" | "ventas" | "historial" | "finanzas";
@@ -116,16 +117,20 @@ function Panel({
 
   if (vendiendo) {
     return (
-      <VentaPantalla
-        perfume={vendiendo}
-        onVender={(datos) => crearVenta(vendiendo, datos)}
-        onCerrar={() => setVendiendo(null)}
-      />
+      <>
+        <AvisoPago />
+        <VentaPantalla
+          perfume={vendiendo}
+          onVender={(datos) => crearVenta(vendiendo, datos)}
+          onCerrar={() => setVendiendo(null)}
+        />
+      </>
     );
   }
 
   return (
     <div className="app">
+      <AvisoPago />
       <header className="header">
         <div className="header-titulo">
           <h1><img src="/icono.png" alt="" className="header-flor" /> Stock Productos</h1>
