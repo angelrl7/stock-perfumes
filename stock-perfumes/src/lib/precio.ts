@@ -11,9 +11,9 @@ export function precioSugerido(p: Pick<Perfume, "precio_compra" | "margen" | "pr
   return redondear(p.precio_compra * (1 + p.margen / 100));
 }
 
-/** Precio mayorista: 20% menos que el precio final. */
-export function precioMayorista(p: Pick<Perfume, "precio_compra" | "margen" | "precio_manual">): number {
-  return redondear(precioSugerido(p) * 0.8);
+/** Precio mayorista: precio de costo + 25%. */
+export function precioMayorista(p: Pick<Perfume, "precio_compra">): number {
+  return redondear(p.precio_compra * 1.25);
 }
 
 export function formatoARS(valor: number): string {

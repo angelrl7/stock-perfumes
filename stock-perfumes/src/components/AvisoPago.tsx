@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 /* ============================================
    Configurá el aviso acá y listo.
@@ -11,32 +11,47 @@ const AVISO = {
   contacto: "",
 };
 
-const CLAVE = "aviso-pago-minimizado";
+/** Cuánto queda a la vista antes de irse solo. */
+const DURACION = 3000;
+/** Tiene que coincidir con la animación .aviso-pago-sale del CSS. */
+const SALIDA = 260;
+
+/**
+ * Se muestra una sola vez por entrada a la app: al recargar o volver a abrir
+ * vuelve a aparecer, pero navegar dentro de la app no lo repite.
+ */
+let yaSeMostro = false;
 
 export default function AvisoPago() {
-  const [minimizado, setMinimizado] = useState(
-    () => sessionStorage.getItem(CLAVE) === "1"
-  );
+  const [visible, setVisible] = useState(() => AVISO.activo && !yaSeMostro);
+  const [saliendo, setSaliendo] = useState(false);
   const [copiado, setCopiado] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   // El header es sticky: le avisamos cuánto mide el aviso para que no se tape.
   useLayoutEffect(() => {
-    const alto = ref.current?.offsetHeight ?? 0;
+    const alto = visible && !saliendo ? ref.current?.offsetHeight ?? 0 : 0;
     document.documentElement.style.setProperty("--aviso-alto", `${alto}px`);
-  }, [minimizado]);
+  }, [visible, saliendo]);
 
-  if (!AVISO.activo) return null;
+  // A los 3 segundos arranca a irse solo.
+  useEffect(() => {
+    if (!visible || saliendo) return;
+    const t = setTimeout(() => setSaliendo(true), DURACION);
+    return () => clearTimeout(t);
+  }, [visible, saliendo]);
 
-  const ocultar = () => {
-    sessionStorage.setItem(CLAVE, "1");
-    setMinimizado(true);
-  };
+  // Terminada la animación de salida, se desmonta y no vuelve hasta recargar.
+  useEffect(() => {
+    if (!saliendo) return;
+    const t = setTimeout(() => {
+      yaSeMostro = true;
+      setVisible(false);
+    }, SALIDA);
+    return () => clearTimeout(t);
+  }, [saliendo]);
 
-  const mostrar = () => {
-    sessionStorage.removeItem(CLAVE);
-    setMinimizado(false);
-  };
+  if (!visible) return null;
 
   const copiarAlias = async () => {
     try {
@@ -48,24 +63,20 @@ export default function AvisoPago() {
     }
   };
 
-  if (minimizado) {
-    return (
-      <div className="aviso-pago aviso-pago-min" ref={ref}>
-        <button className="aviso-pago-strip" onClick={mostrar}>
-          <span className="aviso-pago-punto" aria-hidden="true" />
-          Pago pendiente del sistema
-          <span className="aviso-pago-ver">Ver</span>
-        </button>
-      </div>
-    );
-  }
-
   return (
-    <div className="aviso-pago" ref={ref}>
+    <div
+      className={`aviso-pago ${saliendo ? "aviso-pago-sale" : "aviso-pago-entra"}`}
+      ref={ref}
+      role="status"
+    >
       <div className="aviso-pago-caja">
         <div className="aviso-pago-cabecera">
           <strong>Pago pendiente</strong>
-          <button className="aviso-pago-cerrar" onClick={ocultar} aria-label="Ocultar aviso">
+          <button
+            className="aviso-pago-cerrar"
+            onClick={() => setSaliendo(true)}
+            aria-label="Cerrar aviso"
+          >
             ✕
           </button>
         </div>
@@ -89,10 +100,6 @@ export default function AvisoPago() {
         {AVISO.contacto && (
           <p className="aviso-pago-contacto">Cualquier duda, escribime: {AVISO.contacto}</p>
         )}
-
-        <button className="aviso-pago-ocultar" onClick={ocultar}>
-          Ocultar por ahora
-        </button>
       </div>
     </div>
   );

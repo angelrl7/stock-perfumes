@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { Pencil } from "lucide-react";
 import type { Perfume } from "../types";
 import { formatoARS, precioMayorista, precioSugerido } from "../lib/precio";
@@ -42,6 +43,17 @@ function Frasquito({ stock, minimo }: { stock: number; minimo: number }) {
 
 export default function PerfumeCard({ perfume, onEditar, onAjustar, onVender }: Props) {
   const [verFoto, setVerFoto] = useState(false);
+
+  // En la compu se espera poder cerrar la foto con Escape.
+  useEffect(() => {
+    if (!verFoto) return;
+    const alTecla = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setVerFoto(false);
+    };
+    window.addEventListener("keydown", alTecla);
+    return () => window.removeEventListener("keydown", alTecla);
+  }, [verFoto]);
+
   const sugerido = precioSugerido(perfume);
   const mayorista = precioMayorista(perfume);
   const sinStock = perfume.stock <= 0;
@@ -117,11 +129,17 @@ export default function PerfumeCard({ perfume, onEditar, onAjustar, onVender }: 
         </button>
       </div>
 
-      {verFoto && perfume.foto_url && (
-        <div className="foto-ampliada" onClick={() => setVerFoto(false)}>
-          <img src={perfume.foto_url} alt={perfume.nombre} />
-        </div>
-      )}
+      {/* La foto ampliada va al body: si queda dentro de la card, el hover de la
+          card (que usa transform) le hace de contenedor al position:fixed y la
+          imagen parpadea al abrirse. */}
+      {verFoto &&
+        perfume.foto_url &&
+        createPortal(
+          <div className="foto-ampliada" onClick={() => setVerFoto(false)}>
+            <img src={perfume.foto_url} alt={perfume.nombre} />
+          </div>,
+          document.body
+        )}
     </article>
   );
 }

@@ -173,7 +173,7 @@ export default function PerfumeForm({ perfume, onGuardar, onEliminar, onCerrar }
 
         <p className="vista-previa">
           Precio final: <strong>{formatoARS(vistaPrevia)}</strong>
-          {" "}· Mayorista (−20%): <strong>{formatoARS(vistaPreviaMayorista)}</strong>
+          {" "}· Mayorista (costo +25%): <strong>{formatoARS(vistaPreviaMayorista)}</strong>
         </p>
 
         <div className="campos-fila">

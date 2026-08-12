@@ -176,6 +176,7 @@ input { font-family: inherit; font-size: 16px; } /* 16px evita el zoom de iOS */
   z-index: 12;
   background: var(--rojo-fondo);
   border-bottom: 1px solid var(--rojo-borde-suave);
+  overflow: hidden;
 }
 .aviso-pago-caja { padding: 12px 16px 14px; }
 .aviso-pago-cabecera {
@@ -222,44 +223,20 @@ input { font-family: inherit; font-size: 16px; } /* 16px evita el zoom de iOS */
   font-weight: 600;
 }
 .aviso-pago-contacto { margin: 8px 0 0; font-size: 12px; color: var(--tinta-suave); }
-.aviso-pago-ocultar {
-  margin-top: 10px;
-  border: 1px solid var(--rojo-borde-suave);
-  background: transparent;
-  color: var(--rojo);
-  border-radius: 99px;
-  padding: 6px 14px;
-  font-size: 12px;
-  font-weight: 600;
+
+/* Aparece, se queda 3 s (lo maneja el componente) y se va plegándose. */
+.aviso-pago-entra { animation: aviso-entra 0.25s ease both; }
+.aviso-pago-sale { animation: aviso-sale 0.26s ease both; }
+@keyframes aviso-entra {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: none; }
 }
-.aviso-pago-strip {
-  width: 100%;
-  border: none;
-  background: transparent;
-  color: var(--rojo);
-  font-size: 12px;
-  font-weight: 600;
-  padding: 7px 16px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  text-align: left;
-}
-.aviso-pago-punto {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--rojo);
-  flex: none;
-  animation: aviso-latido 1.8s ease-in-out infinite;
-}
-.aviso-pago-ver { margin-left: auto; text-decoration: underline; }
-@keyframes aviso-latido {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.25; }
+@keyframes aviso-sale {
+  from { opacity: 1; max-height: 240px; }
+  to { opacity: 0; max-height: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .aviso-pago-punto { animation: none; }
+  .aviso-pago-entra, .aviso-pago-sale { animation-duration: 0.01s; }
 }
 
 /* ---------- Header + tabs ---------- */
@@ -270,6 +247,7 @@ input { font-family: inherit; font-size: 16px; } /* 16px evita el zoom de iOS */
   background: var(--marfil);
   position: sticky;
   top: var(--aviso-alto, 0px);
+  transition: top 0.26s ease;
   z-index: 10;
 }
 .header-titulo { display: flex; align-items: baseline; justify-content: space-between; }
