@@ -6,7 +6,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
    - alias / contacto: "" para ocultar esa línea.
    ============================================ */
 const AVISO = {
-  activo: true,
+  activo: false,
   alias: "",
   contacto: "",
 };
