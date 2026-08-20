@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { MovimientoCaja } from "../types";
 import { formatoARS } from "../lib/precio";
 import { fechaCorta, hoyISO } from "../lib/fecha";
+import FilaMovimiento from "./FilaMovimiento";
 
 interface Props {
   usuario: string;
@@ -125,27 +126,17 @@ export default function CuentaUsuarioModal({
         {movimientos.length === 0 ? (
           <p className="vacio">Todavía no se descontó nada de esta cuenta.</p>
         ) : (
-          <ul className="historial">
-            {movimientos.map((mv) => {
-              const clase = mv.tipo === "retiro" ? "fin-out" : "fin-in";
-              return (
-                <li key={mv.id} className="mov">
-                  <span className={`mov-tipo ${clase}`}>
-                    {mv.tipo === "retiro" ? "Retiro" : "Ingreso"}
-                  </span>
-                  <div className="mov-info">
-                    <span className="mov-nombre">
-                      {mv.descripcion || (mv.tipo === "retiro" ? "Retiro" : "Ingreso")}
-                    </span>
-                    <span className="mov-meta">{fechaCorta(mv.fecha)}</span>
-                  </div>
-                  <span className={`mov-cantidad ${clase}`}>
-                    {mv.tipo === "retiro" ? "−" : "+"}
-                    {formatoARS(mv.monto)}
-                  </span>
-                </li>
-              );
-            })}
+          <ul className="borde-fino divisor-fino overflow-hidden rounded-xl bg-superficie">
+            {movimientos.map((mv) => (
+              <FilaMovimiento
+                key={mv.id}
+                sentido={mv.tipo === "retiro" ? "sale" : "entra"}
+                titulo={mv.tipo === "retiro" ? "Retiro" : "Ingreso"}
+                detalle={mv.descripcion || undefined}
+                meta={fechaCorta(mv.fecha)}
+                monto={formatoARS(mv.monto)}
+              />
+            ))}
           </ul>
         )}
       </div>

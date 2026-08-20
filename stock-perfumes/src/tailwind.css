@@ -1,4 +1,69 @@
-/* Solo utilidades de Tailwind, sin el reset "preflight": este proyecto ya
-   tiene sus propios estilos base en styles.css y no queremos que choquen. */
-@import "tailwindcss/theme.css" layer(theme);
-@import "tailwindcss/utilities.css" layer(utilities);
+/* ============================================
+   SISTEMA DE DISEÑO — emerald/teal, editorial
+   Tailwind v4 completo (con preflight): los estilos base propios
+   viven en styles.css, que se importa después.
+
+   El tema lo maneja App.tsx escribiendo [data-tema] en <html>.
+   No usamos la clase .dark para no tocar esa lógica.
+   ============================================ */
+@import "tailwindcss";
+
+@custom-variant oscuro (&:where([data-tema="oscuro"], [data-tema="oscuro"] *));
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  /* --- Tema claro --- */
+  /* Superficies */
+  --color-lienzo: #fbfbfa;
+  --color-superficie: #ffffff;
+  --color-borde: #e8e8e6;
+
+  /* Texto */
+  --color-tinta: #1c1c1a;
+  --color-tenue: #8a8a85;
+
+  /* Acento emerald/teal */
+  --color-acento: #0f6e56;
+  --color-acento-vivo: #15866a;
+  --color-acento-suave: #e1f5ee;
+  --color-acento-texto: #0f6e56;
+
+  /* Alerta naranja */
+  --color-alerta: #d85a30;
+  --color-alerta-suave: #fbeee8;
+  --color-alerta-texto: #993c1d;
+
+  /* Skeleton */
+  --color-hueso: #eeeeec;
+  --color-brillo: #f7f7f6;
+}
+
+/* --- Tema oscuro: mismos tokens, otros valores.
+   Los componentes no llevan variantes encima, heredan del token. --- */
+:root[data-tema="oscuro"] {
+  --color-lienzo: #101211;
+  --color-superficie: #171a19;
+  --color-borde: #272b29;
+
+  --color-tinta: #ecedeb;
+  --color-tenue: #8e948f;
+
+  --color-acento: #2fa07e;
+  --color-acento-vivo: #3ab991;
+  --color-acento-suave: #133a31;
+  --color-acento-texto: #7fe3c0;
+
+  --color-alerta: #d85a30;
+  --color-alerta-suave: #33201a;
+  --color-alerta-texto: #f0a98d;
+
+  --color-hueso: #222625;
+  --color-brillo: #2c3130;
+
+  color-scheme: dark;
+}
+
+:root {
+  color-scheme: light;
+}

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { FileText } from "lucide-react";
 import type { Venta } from "../types";
 import { formatoARS } from "../lib/precio";
 import { fechaCorta, hoyISO } from "../lib/fecha";
@@ -145,7 +146,8 @@ export function VentaItem({
           </button>
         )}
         <button className="btn-ticket" onClick={() => compartirTicketPDF(venta)}>
-          🧾 Ticket PDF
+          <FileText size={14} strokeWidth={1.75} />
+          Ticket PDF
         </button>
       </div>
 

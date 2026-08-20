@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ArrowLeft } from "lucide-react";
 import type { NuevaVenta, Perfume, TipoPago } from "../types";
 import { formatoARS, precioMayorista, precioSugerido } from "../lib/precio";
 
@@ -68,14 +69,12 @@ export default function VentaPantalla({ perfume, onVender, onCerrar }: Props) {
 
   return (
     <div className="app">
-      <header className="header">
-        <div className="header-titulo">
-          <div className="header-volver">
-            <button className="btn-volver" onClick={onCerrar} aria-label="Volver">
-              ←
-            </button>
-            <h1>Nueva venta</h1>
-          </div>
+      <header className="borde-fino-b fixed inset-x-0 top-0 z-30 bg-superficie/90 backdrop-blur-sm">
+        <div className="mx-auto flex h-14 w-full max-w-5xl items-center gap-2 px-4">
+          <button className="btn-volver" onClick={onCerrar} aria-label="Volver">
+            <ArrowLeft size={18} strokeWidth={1.75} />
+          </button>
+          <h1>Nueva venta</h1>
         </div>
       </header>
 

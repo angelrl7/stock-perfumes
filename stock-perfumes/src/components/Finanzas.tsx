@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Download } from "lucide-react";
 import type { MovimientoCaja, Perfume, TipoCaja, Venta } from "../types";
 import { formatoARS } from "../lib/precio";
 import { fechaCorta } from "../lib/fecha";
@@ -23,6 +23,8 @@ import {
 import { compartirReporteMensual } from "../lib/reporteMensual";
 import CajaModal from "./CajaModal";
 import CuentaUsuarioModal from "./CuentaUsuarioModal";
+import FilaMovimiento from "./FilaMovimiento";
+import TarjetaMetrica from "./TarjetaMetrica";
 
 interface Props {
   usuarioActual: string;
@@ -149,42 +151,31 @@ export default function Finanzas({
   return (
     <>
       <div className="finanzas-resumen">
-        <div className="finanzas-tarjeta">
-          <span className="finanzas-tarjeta-label">Caja en común</span>
-          <span className="finanzas-tarjeta-valor">{formatoARS(saldo)}</span>
-        </div>
-        <div className="finanzas-tarjeta">
-          <span className="finanzas-tarjeta-label">Capital en stock</span>
-          <span className="finanzas-tarjeta-valor">{formatoARS(capital)}</span>
-        </div>
-        <button className="finanzas-tarjeta" onClick={() => setGananciaAbierta(true)}>
-          <span className="finanzas-tarjeta-label">Ganancia</span>
-          <span className="finanzas-tarjeta-valor">
-            {formatoARS(ganancia.monto)}{" "}
-            <span className="finanzas-tarjeta-porcentaje">
-              ({Math.round(ganancia.porcentaje)}%)
-            </span>
-          </span>
-        </button>
-        <button className="finanzas-tarjeta" onClick={() => setPlataCalleAbierta(true)}>
-          <span className="finanzas-tarjeta-label">Plata en la calle</span>
-          <span className="finanzas-tarjeta-valor texto-rojo">{formatoARS(plataEnLaCalle)}</span>
-        </button>
-        <div className="finanzas-tarjeta finanzas-tarjeta-gris">
-          <span className="finanzas-tarjeta-label">Total de las ventas</span>
-          <span className="finanzas-tarjeta-valor">{formatoARS(totalDeVentas)}</span>
-        </div>
+        <TarjetaMetrica label="Caja en común" valor={formatoARS(saldo)} />
+        <TarjetaMetrica label="Capital en stock" valor={formatoARS(capital)} />
+        <TarjetaMetrica
+          label="Ganancia"
+          valor={formatoARS(ganancia.monto)}
+          comparativo={`${Math.round(ganancia.porcentaje)}% sobre el costo`}
+          tendencia={ganancia.monto < 0 ? "baja" : "sube"}
+          tono={ganancia.monto < 0 ? "sale" : "entra"}
+          onClick={() => setGananciaAbierta(true)}
+        />
+        <TarjetaMetrica
+          label="Plata en la calle"
+          valor={formatoARS(plataEnLaCalle)}
+          tono="sale"
+          comparativo="Fiado sin cobrar"
+          onClick={() => setPlataCalleAbierta(true)}
+        />
+        <TarjetaMetrica label="Total de las ventas" valor={formatoARS(totalDeVentas)} />
         {porUsuario.map((u) => (
-          <button
-            className="finanzas-tarjeta"
+          <TarjetaMetrica
             key={u.usuario}
+            label={`Cuenta · ${u.usuario}`}
+            valor={formatoARS(saldoIndividual(u.usuario, ventas, cajaMovimientos))}
             onClick={() => setCuentaAbierta(u.usuario)}
-          >
-            <span className="finanzas-tarjeta-label">Cuenta · {u.usuario}</span>
-            <span className="finanzas-tarjeta-valor">
-              {formatoARS(saldoIndividual(u.usuario, ventas, cajaMovimientos))}
-            </span>
-          </button>
+          />
         ))}
       </div>
 
@@ -211,25 +202,17 @@ export default function Finanzas({
           {ledger.length === 0 ? (
             <p className="vacio">Todavía no hay movimientos de plata.</p>
           ) : (
-            <ul className="historial">
-              {ledger.map((m) => {
-                const clase = m.monto < 0 ? "fin-out" : "fin-in";
-                return (
-                  <li key={m.id} className="mov">
-                    <span className={`mov-tipo ${clase}`}>{ETIQUETA_TIPO[m.tipo]}</span>
-                    <div className="mov-info">
-                      <span className="mov-nombre">{m.descripcion}</span>
-                      <span className="mov-meta">
-                        {fechaCorta(m.fecha)} · {m.usuario}
-                      </span>
-                    </div>
-                    <span className={`mov-cantidad ${clase}`}>
-                      {m.monto < 0 ? "−" : "+"}
-                      {formatoARS(Math.abs(m.monto))}
-                    </span>
-                  </li>
-                );
-              })}
+            <ul className="borde-fino divisor-fino overflow-hidden rounded-xl bg-superficie">
+              {ledger.map((m) => (
+                <FilaMovimiento
+                  key={m.id}
+                  sentido={m.monto < 0 ? "sale" : "entra"}
+                  titulo={ETIQUETA_TIPO[m.tipo]}
+                  detalle={m.descripcion}
+                  meta={`${fechaCorta(m.fecha)} · ${m.usuario}`}
+                  monto={formatoARS(Math.abs(m.monto))}
+                />
+              ))}
             </ul>
           )}
         </>
@@ -295,7 +278,14 @@ export default function Finanzas({
                       onClick={() => descargarMes(mes.mes, mes.etiqueta, usuarioFiltro)}
                       disabled={generandoMes === mes.mes}
                     >
-                      {generandoMes === mes.mes ? "Generando…" : "🧾 Descargar PDF"}
+                      {generandoMes === mes.mes ? (
+                        "Generando…"
+                      ) : (
+                        <>
+                          <Download size={14} strokeWidth={1.75} />
+                          Descargar PDF
+                        </>
+                      )}
                     </button>
                   </li>
                 );

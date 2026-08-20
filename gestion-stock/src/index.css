@@ -1,0 +1,140 @@
+@import "tailwindcss";
+
+/* Dark mode por clase en <html>, no por preferencia del sistema:
+   así el toggle de la navbar manda. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  /* --- Tema claro --- */
+  /* Superficies */
+  --color-lienzo: #fbfbfa;
+  --color-superficie: #ffffff;
+  --color-borde: #e8e8e6;
+
+  /* Texto */
+  --color-tinta: #1c1c1a;
+  --color-tenue: #8a8a85;
+
+  /* Acento emerald/teal */
+  --color-acento: #0f6e56;
+  --color-acento-vivo: #15866a;
+  --color-acento-suave: #e1f5ee;
+  --color-acento-texto: #0f6e56;
+
+  /* Alerta naranja */
+  --color-alerta: #d85a30;
+  --color-alerta-suave: #fbeee8;
+  --color-alerta-texto: #993c1d;
+
+  /* Skeleton */
+  --color-hueso: #eeeeec;
+  --color-brillo: #f7f7f6;
+}
+
+/* --- Tema oscuro: mismos tokens, otros valores.
+   Los componentes no llevan `dark:` encima, heredan del token. --- */
+:root.dark {
+  --color-lienzo: #101211;
+  --color-superficie: #171a19;
+  --color-borde: #272b29;
+
+  --color-tinta: #ecedeb;
+  --color-tenue: #8e948f;
+
+  --color-acento: #2fa07e;
+  --color-acento-vivo: #3ab991;
+  --color-acento-suave: #133a31;
+  --color-acento-texto: #7fe3c0;
+
+  --color-alerta: #d85a30;
+  --color-alerta-suave: #33201a;
+  --color-alerta-texto: #f0a98d;
+
+  --color-hueso: #222625;
+  --color-brillo: #2c3130;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-lienzo);
+  color: var(--color-tinta);
+  font-family: var(--font-sans);
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Solo regular (400) y medium (500) */
+h1, h2, h3, h4, strong, b {
+  font-weight: 500;
+}
+
+/* Bordes de 0.5px: Tailwind no tiene utilidad para medio píxel */
+.borde-fino {
+  border: 0.5px solid var(--color-borde);
+}
+.borde-fino-b {
+  border-bottom: 0.5px solid var(--color-borde);
+}
+.borde-fino-t {
+  border-top: 0.5px solid var(--color-borde);
+}
+
+/* Skeleton con brillo deslizante */
+@keyframes deslizar-brillo {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--color-hueso);
+}
+
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background-image: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-brillo),
+    transparent
+  );
+  animation: deslizar-brillo 1.4s infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton::after {
+    animation: none;
+  }
+}
+
+/* Degradado de lectura sobre la foto de producto */
+.velo-foto {
+  background-image: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.72) 0%,
+    rgba(0, 0, 0, 0.45) 38%,
+    rgba(0, 0, 0, 0) 72%
+  );
+}
+
+/* Respeta la barra de gestos de iOS en la bottom nav */
+.margen-seguro {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Separadores internos de lista, también en medio píxel */
+.divisor-fino > * + * {
+  border-top: 0.5px solid var(--color-borde);
+}

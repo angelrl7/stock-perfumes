@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Camera } from "lucide-react";
 import type { Perfume, PerfumeInput } from "../types";
 import { formatoARS, precioMayorista, precioSugerido } from "../lib/precio";
 import { borrarFoto, comprimirImagen, subirFoto } from "../lib/fotos";
@@ -128,7 +129,14 @@ export default function PerfumeForm({ perfume, onGuardar, onEliminar, onCerrar }
             </div>
           ) : (
             <label className="foto-boton">
-              {procesandoFoto ? "Procesando…" : "📷 Sacar o elegir foto"}
+              {procesandoFoto ? (
+                "Procesando…"
+              ) : (
+                <span className="flex items-center gap-2">
+                  <Camera size={16} strokeWidth={1.75} />
+                  Sacar o elegir foto
+                </span>
+              )}
               <input
                 type="file"
                 accept="image/*"
