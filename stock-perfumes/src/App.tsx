@@ -104,6 +104,7 @@ function Panel({
     eliminar,
     ajustarStock,
     crearVenta,
+    eliminarVenta,
     agregarPago,
     registrarMovimientoCaja,
   } = usePerfumes(usuario);
@@ -224,10 +225,20 @@ function Panel({
           </>
         )}
 
-        {vista === "ventas" && <Ventas ventas={pendientes} onPago={agregarPago} />}
+        {vista === "ventas" && (
+          <Ventas
+            ventas={pendientes}
+            onPago={agregarPago}
+            onEliminar={eliminarVenta}
+          />
+        )}
 
         {vista === "historial" && (
-          <Historial movimientos={movimientos} ventas={saldadas} />
+          <Historial
+            movimientos={movimientos}
+            ventas={saldadas}
+            onEliminarVenta={eliminarVenta}
+          />
         )}
 
         {vista === "finanzas" && (

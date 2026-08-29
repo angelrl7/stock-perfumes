@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FileText } from "lucide-react";
+import { FileText, Trash2 } from "lucide-react";
 import type { Venta } from "../types";
 import { formatoARS } from "../lib/precio";
 import { fechaCorta, hoyISO } from "../lib/fecha";
@@ -24,9 +24,10 @@ function fechaLinda(iso: string): string {
 interface Props {
   ventas: Venta[];
   onPago: (ventaId: string, monto: number, fecha: string) => Promise<void>;
+  onEliminar: (venta: Venta) => Promise<void>;
 }
 
-export default function Ventas({ ventas, onPago }: Props) {
+export default function Ventas({ ventas, onPago, onEliminar }: Props) {
   if (ventas.length === 0) {
     return (
       <p className="vacio">
@@ -39,7 +40,12 @@ export default function Ventas({ ventas, onPago }: Props) {
   return (
     <ul className="ventas">
       {ventas.map((v) => (
-        <VentaItem key={v.id} venta={v} onPago={onPago} />
+        <VentaItem
+          key={v.id}
+          venta={v}
+          onPago={onPago}
+          onEliminar={() => onEliminar(v)}
+        />
       ))}
     </ul>
   );
@@ -48,14 +54,19 @@ export default function Ventas({ ventas, onPago }: Props) {
 export function VentaItem({
   venta,
   onPago,
+  onEliminar,
 }: {
   venta: Venta;
   onPago?: Props["onPago"];
+  /** Si viene, se puede borrar la venta desde la fila. */
+  onEliminar?: () => Promise<void>;
 }) {
   const [abierto, setAbierto] = useState(false);
   const [monto, setMonto] = useState("");
   const [fecha, setFecha] = useState(hoyISO());
   const [guardando, setGuardando] = useState(false);
+  const [confirmar, setConfirmar] = useState(false);
+  const [borrando, setBorrando] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const pagado = totalPagado(venta);
@@ -76,6 +87,19 @@ export function VentaItem({
       setError(err instanceof Error ? err.message : "Error al registrar el pago.");
     }
     setGuardando(false);
+  };
+
+  const borrar = async () => {
+    if (!onEliminar) return;
+    setBorrando(true);
+    setError(null);
+    try {
+      await onEliminar();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al eliminar la venta.");
+      setBorrando(false);
+      setConfirmar(false);
+    }
   };
 
   return (
@@ -139,6 +163,21 @@ export function VentaItem({
         </div>
       )}
 
+      {confirmar && (
+        <div className="confirmar-borrado">
+          <span>
+            ¿Eliminar la venta? Le devuelve el stock al producto y saca sus cobros
+            de la caja.
+          </span>
+          <button className="btn-chico btn-rojo" onClick={borrar} disabled={borrando}>
+            {borrando ? "…" : "Sí, eliminar"}
+          </button>
+          <button className="btn-chico" onClick={() => setConfirmar(false)}>
+            No
+          </button>
+        </div>
+      )}
+
       <div className="venta-acciones">
         {!saldada && onPago && !abierto && (
           <button className="btn-agregar-pago" onClick={() => setAbierto(true)}>
@@ -149,6 +188,12 @@ export function VentaItem({
           <FileText size={14} strokeWidth={1.75} />
           Ticket PDF
         </button>
+        {onEliminar && !confirmar && (
+          <button className="btn-texto-rojo" onClick={() => setConfirmar(true)}>
+            <Trash2 size={14} strokeWidth={1.75} />
+            Eliminar
+          </button>
+        )}
       </div>
 
       {error && <p className="error-msg">{error}</p>}

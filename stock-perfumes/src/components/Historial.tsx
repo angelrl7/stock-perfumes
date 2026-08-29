@@ -39,9 +39,10 @@ interface Props {
   movimientos: Movimiento[];
   /** Ventas ya saldadas (pagadas del todo). */
   ventas: Venta[];
+  onEliminarVenta: (venta: Venta) => Promise<void>;
 }
 
-export default function Historial({ movimientos, ventas }: Props) {
+export default function Historial({ movimientos, ventas, onEliminarVenta }: Props) {
   const [seccion, setSeccion] = useState<Seccion>("ventas");
   const [filtroMov, setFiltroMov] = useState<FiltroMov>("todos");
 
@@ -82,7 +83,7 @@ export default function Historial({ movimientos, ventas }: Props) {
         ) : (
           <ul className="ventas">
             {ventas.map((v) => (
-              <VentaItem key={v.id} venta={v} />
+              <VentaItem key={v.id} venta={v} onEliminar={() => onEliminarVenta(v)} />
             ))}
           </ul>
         ))}

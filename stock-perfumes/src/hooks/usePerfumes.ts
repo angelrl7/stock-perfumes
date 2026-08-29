@@ -175,6 +175,40 @@ export function usePerfumes(usuario: string) {
     await cargar();
   };
 
+  /** Borra una venta: le devuelve el stock al producto y saca su movimiento.
+   *  Los pagos se van solos por el "on delete cascade" de la tabla. */
+  const eliminarVenta = async (venta: Venta) => {
+    const { error } = await supabase.from("ventas").delete().eq("id", venta.id);
+    if (error) throw new Error(error.message);
+
+    if (venta.perfume_id) {
+      const perfume = perfumes.find((p) => p.id === venta.perfume_id);
+      if (perfume) {
+        const { error: eStock } = await supabase
+          .from("perfumes")
+          .update({ stock: perfume.stock + venta.cantidad })
+          .eq("id", perfume.id);
+        if (eStock) throw new Error(eStock.message);
+      }
+
+      // El movimiento se inserta justo despues de la venta, asi que el primero
+      // que coincide a partir de esa fecha es el de esta venta.
+      const { data: movs } = await supabase
+        .from("movimientos")
+        .select("id")
+        .eq("perfume_id", venta.perfume_id)
+        .eq("tipo", "venta")
+        .eq("cantidad", venta.cantidad)
+        .gte("creado_en", venta.creado_en)
+        .order("creado_en")
+        .limit(1);
+      const mov = movs?.[0];
+      if (mov) await supabase.from("movimientos").delete().eq("id", mov.id);
+    }
+
+    await cargar();
+  };
+
   const agregarPago = async (ventaId: string, monto: number, fecha: string) => {
     if (monto <= 0) throw new Error("El monto tiene que ser mayor a 0.");
     const { error } = await supabase.from("pagos").insert({
@@ -218,6 +252,7 @@ export function usePerfumes(usuario: string) {
     eliminar,
     ajustarStock,
     crearVenta,
+    eliminarVenta,
     agregarPago,
     registrarMovimientoCaja,
   };

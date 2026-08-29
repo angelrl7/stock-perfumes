@@ -704,6 +704,12 @@
     gap: 12px;
   }
 
+  .venta-acciones button {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
   /* ---------- Badges ---------- */
 
   .badge-bajo,
