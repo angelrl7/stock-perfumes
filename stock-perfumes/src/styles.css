@@ -735,6 +735,21 @@
     gap: 12px;
   }
 
+  /* Cada tarjeta es su propio contenedor: el numero se mide contra su ancho. */
+  .tarjeta-metrica {
+    container-type: inline-size;
+  }
+
+  /*
+   * --tam lo pone el componente segun cuantos caracteres tiene el numero.
+   * El 13cqi es el tope real: si la tarjeta queda angosta (dos columnas en el
+   * celular con montos de 8 digitos) el numero se achica hasta entrar en una
+   * sola linea, en vez de cortarse o desbordar.
+   */
+  .tarjeta-metrica-valor {
+    font-size: min(var(--tam, 24px), 13cqi);
+  }
+
   .finanzas-tarjeta-label { font-size: 13px; color: var(--color-tenue); }
 
   .finanzas-tarjeta-porcentaje { font-size: 13px; color: var(--color-tenue); }
