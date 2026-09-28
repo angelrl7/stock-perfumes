@@ -56,7 +56,17 @@ function fechaLinda(iso: string): string {
   });
 }
 
-function CajaUsuarioVentas({ datos }: { datos: VentasDeUsuario }) {
+function porcentajeDe(parte: number, total: number): string {
+  return total > 0 ? `${Math.round((parte / total) * 100)}%` : "0%";
+}
+
+function CajaUsuarioVentas({
+  datos,
+  totalGeneral,
+}: {
+  datos: VentasDeUsuario;
+  totalGeneral: number;
+}) {
   const [abierto, setAbierto] = useState(false);
 
   return (
@@ -68,7 +78,12 @@ function CajaUsuarioVentas({ datos }: { datos: VentasDeUsuario }) {
       >
         <span className="finanzas-usuario-nombre">{datos.usuario}</span>
         <span className="finanzas-usuario-cabecera-derecha">
-          <span className="finanzas-usuario-total">{formatoARS(datos.total)}</span>
+          <span className="finanzas-usuario-total">
+            {formatoARS(datos.total)}{" "}
+            <span className="finanzas-tarjeta-porcentaje">
+              ({porcentajeDe(datos.total, totalGeneral)})
+            </span>
+          </span>
           <ChevronDown
             size={16}
             className={`finanzas-usuario-chevron ${abierto ? "abierto" : ""}`}
@@ -224,7 +239,7 @@ export default function Finanzas({
         ) : (
           <ul className="finanzas-usuarios">
             {porUsuario.map((u) => (
-              <CajaUsuarioVentas key={u.usuario} datos={u} />
+              <CajaUsuarioVentas key={u.usuario} datos={u} totalGeneral={totalDeVentas} />
             ))}
           </ul>
         ))}
@@ -248,7 +263,12 @@ export default function Finanzas({
                       {mes.porUsuario.map((u) => (
                         <li key={u.usuario}>
                           <span>{u.usuario}</span>
-                          <span>{formatoARS(u.total)}</span>
+                          <span>
+                            {formatoARS(u.total)}{" "}
+                            <span className="finanzas-tarjeta-porcentaje">
+                              ({porcentajeDe(u.total, mes.total)})
+                            </span>
+                          </span>
                         </li>
                       ))}
                     </ul>

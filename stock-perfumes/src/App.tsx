@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { Moon, Plus, Sun } from "lucide-react";
+import { sileo } from "sileo";
 import { supabase } from "./lib/supabase";
 import { usePerfumes } from "./hooks/usePerfumes";
 import type { Perfume, TipoMovimiento } from "./types";
@@ -116,6 +117,10 @@ function Panel({
   const [editando, setEditando] = useState<Perfume | null>(null);
   const [ajustando, setAjustando] = useState<Perfume | null>(null);
   const [vendiendo, setVendiendo] = useState<Perfume | null>(null);
+
+  useEffect(() => {
+    if (error) sileo.error({ title: error });
+  }, [error]);
 
   // Los chips salen de las marcas realmente cargadas: no hay campo "categoría".
   const opcionesFiltro = useMemo(() => {

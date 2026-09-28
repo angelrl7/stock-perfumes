@@ -46,9 +46,11 @@ create trigger trg_perfumes_actualizado
 alter table perfumes enable row level security;
 alter table movimientos enable row level security;
 
+drop policy if exists "acceso total autenticados" on perfumes;
 create policy "acceso total autenticados" on perfumes
   for all to authenticated using (true) with check (true);
 
+drop policy if exists "acceso total autenticados mov" on movimientos;
 create policy "acceso total autenticados mov" on movimientos
   for all to authenticated using (true) with check (true);
 

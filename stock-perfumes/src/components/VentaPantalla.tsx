@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ArrowLeft } from "lucide-react";
+import { sileo } from "sileo";
 import type { NuevaVenta, Perfume, TipoPago } from "../types";
 import { formatoARS, precioMayorista, precioSugerido } from "../lib/precio";
 
@@ -60,6 +61,7 @@ export default function VentaPantalla({ perfume, onVender, onCerrar }: Props) {
         tipo_pago: tipoPago,
         entrega: tipoPago === "contado" ? t : e,
       });
+      sileo.success({ title: `Venta registrada · ${cliente.trim()}` });
       onCerrar();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al registrar la venta.");
