@@ -231,6 +231,25 @@ export function ventasPorMes(ventas: Venta[]): MesVentas[] {
     .sort((a, b) => b.mes.localeCompare(a.mes));
 }
 
+export interface GananciaDelMes extends Ganancia {
+  mes: string; // "2026-07"
+  etiqueta: string; // "Julio 2026"
+  vendido: number;
+  /** Costo de lo vendido (precio de compra actual × cantidad). */
+  inversion: number;
+}
+
+/** Resumen mes a mes: vendido, inversión y ganancia, del mes más reciente al más viejo. */
+export function gananciaPorMes(
+  ventas: Venta[],
+  perfumes: { id: string; precio_compra: number }[]
+): GananciaDelMes[] {
+  return ventasPorMes(ventas).map(({ mes, etiqueta, total }) => {
+    const { monto, porcentaje } = gananciaTotal(ventasDelMes(mes, ventas), perfumes);
+    return { mes, etiqueta, vendido: total, inversion: total - monto, monto, porcentaje };
+  });
+}
+
 /** Ventas de un mes puntual ("2026-07"), opcionalmente de un solo usuario, de la más vieja a la más nueva. */
 export function ventasDelMes(mes: string, ventas: Venta[], usuario?: string): Venta[] {
   return ventas

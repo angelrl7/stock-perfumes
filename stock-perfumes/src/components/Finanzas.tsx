@@ -8,6 +8,7 @@ import {
   capitalEnStock,
   cobradoYFiadoDeUsuario,
   fiadoPorUsuario,
+  gananciaPorMes,
   gananciaPorUsuario,
   gananciaTotal,
   movimientosCaja,
@@ -186,6 +187,7 @@ export default function Finanzas({
   const fiadoUsuarios = fiadoPorUsuario(ventas);
   const ganancia = gananciaTotal(ventas, perfumes);
   const gananciaUsuarios = gananciaPorUsuario(ventas, perfumes);
+  const gananciaMeses = gananciaPorMes(ventas, perfumes);
 
   return (
     <>
@@ -503,6 +505,42 @@ export default function Finanzas({
                   </li>
                 ))}
               </ul>
+            )}
+
+            {gananciaMeses.length > 0 && (
+              <>
+                <p className="cuenta-subtitulo">Resumen por mes</p>
+                <ul className="ganancia-meses">
+                  {gananciaMeses.map((m) => (
+                    <li key={m.mes} className="ganancia-mes">
+                      <span className="ganancia-mes-etiqueta">{m.etiqueta}</span>
+                      <div className="ganancia-mes-datos">
+                        <div>
+                          <span>Vendido</span>
+                          <strong>{formatoARS(m.vendido)}</strong>
+                        </div>
+                        <div>
+                          <span>Inversión</span>
+                          <strong>{formatoARS(m.inversion)}</strong>
+                        </div>
+                        <div>
+                          <span>Ganancia</span>
+                          <strong
+                            className={
+                              m.monto < 0 ? "fin-out-texto" : "fin-in-texto"
+                            }
+                          >
+                            {formatoARS(m.monto)}{" "}
+                            <span className="finanzas-tarjeta-porcentaje">
+                              ({Math.round(m.porcentaje)}%)
+                            </span>
+                          </strong>
+                        </div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </>
             )}
           </div>
         </div>
