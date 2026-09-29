@@ -530,10 +530,7 @@ export default function Finanzas({
                               m.monto < 0 ? "fin-out-texto" : "fin-in-texto"
                             }
                           >
-                            {formatoARS(m.monto)}{" "}
-                            <span className="finanzas-tarjeta-porcentaje">
-                              ({Math.round(m.porcentaje)}%)
-                            </span>
+                            {formatoARS(m.monto)}
                           </strong>
                         </div>
                       </div>
