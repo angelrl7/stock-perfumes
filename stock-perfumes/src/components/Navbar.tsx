@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState, type ComponentType } from "react";
 import {
   Banknote,
-  Boxes,
   Download,
   History,
   LogOut,
@@ -82,11 +81,18 @@ export default function Navbar({
       <header className="borde-fino-b fixed inset-x-0 top-0 z-30 bg-superficie/90 backdrop-blur-sm">
         <nav className="mx-auto flex h-14 w-full max-w-5xl items-center justify-between gap-3 px-5">
           <div className="flex min-w-0 items-center gap-2.5">
-            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-acento">
-              <Boxes size={16} strokeWidth={1.75} className="text-white" />
+            {/* logo.jpeg es el logo entero (1280×697, con texto): acá se recorta
+                solo el gráfico de barras para que entre en el cuadradito. */}
+            <span className="relative h-8 w-8 shrink-0 overflow-hidden rounded-lg bg-[#0b1215]">
+              <img
+                src="/logo.jpeg"
+                alt=""
+                className="absolute max-w-none"
+                style={{ width: 106, left: -37, top: -4 }}
+              />
             </span>
-            <span className="truncate text-[15px] font-medium tracking-tight">
-              Stock productos
+            <span className="truncate text-[16px] font-semibold tracking-tight">
+              Ge<span className="text-acento">Stock</span>
             </span>
           </div>
 

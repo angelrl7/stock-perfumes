@@ -1098,4 +1098,23 @@
   padding-top: 8px;
 }
 
+/* Cada toast de Sileo es un botón invisible de 350px de ancho: en el centro
+   de la barra tapaba las pestañas (Stock, Ventas…). Solo la pastilla visible
+   y, cuando está abierto, el detalle reciben el mouse. */
+[data-sileo-viewport][data-position="top-center"] [data-sileo-toast] {
+  pointer-events: none;
+}
+
+[data-sileo-viewport][data-position="top-center"] [data-sileo-header],
+[data-sileo-viewport][data-position="top-center"] [data-sileo-content][data-visible="true"] {
+  pointer-events: auto;
+}
+
+/* El de faltante, un poco más chico que el resto. `scale` no choca con el
+   `transform` que anima Sileo. */
+[data-sileo-toast]:has(.sileo-faltante) {
+  scale: 0.85;
+  transform-origin: top center;
+}
+
 .sileo-descripcion-oscura { color: rgba(255, 255, 255, 0.7); }

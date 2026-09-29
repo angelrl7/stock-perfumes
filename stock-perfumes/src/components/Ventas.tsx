@@ -28,6 +28,8 @@ interface Props {
 }
 
 export default function Ventas({ ventas, onPago, onEliminar }: Props) {
+  const [busqueda, setBusqueda] = useState("");
+
   if (ventas.length === 0) {
     return (
       <p className="vacio">
@@ -37,17 +39,41 @@ export default function Ventas({ ventas, onPago, onEliminar }: Props) {
     );
   }
 
+  const q = busqueda.trim().toLowerCase();
+  const filtradas = q
+    ? ventas.filter(
+        (v) =>
+          v.cliente.toLowerCase().includes(q) ||
+          v.perfume_nombre.toLowerCase().includes(q) ||
+          v.usuario.toLowerCase().includes(q)
+      )
+    : ventas;
+
   return (
-    <ul className="ventas">
-      {ventas.map((v) => (
-        <VentaItem
-          key={v.id}
-          venta={v}
-          onPago={onPago}
-          onEliminar={() => onEliminar(v)}
-        />
-      ))}
-    </ul>
+    <>
+      <input
+        className="buscador"
+        type="search"
+        placeholder="Buscar por cliente, producto o vendedor…"
+        value={busqueda}
+        onChange={(e) => setBusqueda(e.target.value)}
+      />
+
+      {filtradas.length === 0 ? (
+        <p className="vacio">Ninguna venta coincide con la búsqueda.</p>
+      ) : (
+        <ul className="ventas">
+          {filtradas.map((v) => (
+            <VentaItem
+              key={v.id}
+              venta={v}
+              onPago={onPago}
+              onEliminar={() => onEliminar(v)}
+            />
+          ))}
+        </ul>
+      )}
+    </>
   );
 }
 

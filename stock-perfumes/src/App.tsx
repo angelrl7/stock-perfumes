@@ -152,7 +152,9 @@ function Panel({
       position: "top-center",
       autopilot: false,
       fill: "#1a1a1a",
-      styles: { description: "sileo-descripcion-oscura" },
+      // La clase del título marca a este toast para el CSS (más chico) y para
+      // detectar el hover de abajo.
+      styles: { title: "sileo-faltante", description: "sileo-descripcion-oscura" },
       button: {
         title: "Ver",
         onClick: () => {
@@ -162,16 +164,36 @@ function Panel({
       },
     };
     const id = sileo.warning(opciones);
-    return () => sileo.dismiss(id);
+
+    // Abierto por el hover, se vuelve a cerrar a los 5 segundos: re-emitir el
+    // toast con el mismo id hace que Sileo lo colapse.
+    let cierre: number | undefined;
+    const alPasar = (e: PointerEvent) => {
+      if (cierre !== undefined) return;
+      const toast = (e.target as Element | null)?.closest("[data-sileo-toast]");
+      if (!toast?.querySelector(".sileo-faltante")) return;
+      cierre = window.setTimeout(() => {
+        cierre = undefined;
+        sileo.warning(opciones);
+      }, 5000);
+    };
+    document.addEventListener("pointerover", alPasar);
+
+    return () => {
+      document.removeEventListener("pointerover", alPasar);
+      window.clearTimeout(cierre);
+      sileo.dismiss(id);
+    };
   }, [porReponer, cargando]);
 
-  // Los chips salen de las marcas realmente cargadas: no hay campo "categoría".
-  const opcionesFiltro = useMemo(() => {
-    const marcas = [...new Set(perfumes.map((p) => p.marca).filter(Boolean))].sort((a, b) =>
-      a.localeCompare(b, "es")
-    );
-    return [TODOS, POCO_STOCK, ...marcas];
-  }, [perfumes]);
+  // Las marcas del desplegable salen de las realmente cargadas: no hay campo "categoría".
+  const marcasFiltro = useMemo(
+    () =>
+      [...new Set(perfumes.map((p) => p.marca).filter(Boolean))].sort((a, b) =>
+        a.localeCompare(b, "es")
+      ),
+    [perfumes]
+  );
 
   const filtrados = useMemo(() => {
     let lista = perfumes;
@@ -232,7 +254,9 @@ function Panel({
             />
 
             <ChipsFiltro
-              opciones={opcionesFiltro}
+              opciones={[TODOS, POCO_STOCK]}
+              desplegable={marcasFiltro}
+              etiquetaDesplegable="Marca"
               activo={filtro}
               onCambiar={setFiltro}
               etiqueta="Filtrar productos"
