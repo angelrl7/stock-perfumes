@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Camera } from "lucide-react";
 import type { Perfume, PerfumeInput } from "../types";
 import { formatoARS, precioMayorista, precioSugerido } from "../lib/precio";
+import { sileo } from "sileo";
 import { borrarFoto, comprimirImagen, subirFoto } from "../lib/fotos";
 
 interface Props {
@@ -88,11 +89,14 @@ export default function PerfumeForm({ perfume, onGuardar, onEliminar, onCerrar }
         stock_minimo: parseInt(stockMinimo) || 0,
         foto_url: foto,
       });
+      if (!perfume) sileo.success({ title: "Cargado con éxito" });
       onCerrar();
     } catch (e) {
       // Si la foto se subió pero el guardado falló, la limpiamos del Storage.
       if (fotoSubida) await borrarFoto(fotoSubida);
-      setError(e instanceof Error ? e.message : "Error al guardar.");
+      const mensaje = e instanceof Error ? e.message : "Error al guardar.";
+      setError(mensaje);
+      if (!perfume) sileo.error({ title: "No se pudo cargar", description: mensaje });
       setGuardando(false);
     }
   };

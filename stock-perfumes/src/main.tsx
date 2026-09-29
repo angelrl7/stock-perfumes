@@ -7,7 +7,8 @@ import "./styles.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <Toaster position="top-right" />
+    {/* En Sileo "light" es el tema de toasts oscuros (pensado para páginas claras). */}
+    <Toaster position="top-center" theme="light" />
     <App />
   </React.StrictMode>
 );

@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { ArrowUpDown, Pencil, ShoppingCart } from "lucide-react";
+import { ArrowUpDown, Pencil, ShoppingCart, Trash2 } from "lucide-react";
 import type { Perfume } from "../types";
-import { formatoARS, precioSugerido } from "../lib/precio";
+import { formatoARS, precioMayorista, precioSugerido } from "../lib/precio";
 import FotoProducto from "./FotoProducto";
 import { pocoStock, sinStock } from "./umbrales";
 
@@ -11,15 +11,36 @@ interface Props {
   onEditar: () => void;
   onAjustar: () => void;
   onVender: () => void;
+  onEliminar: () => Promise<void>;
 }
 
-/** Los tres botones miden lo mismo y entran en una card de 150px: a esa medida
+/** Los botones miden lo mismo y entran en una card de 150px: a esa medida
  *  no hay lugar para etiquetas de texto, así que la jerarquía la marca el color
  *  (vender en emerald sólido, los otros dos en superficie con borde fino). */
-const BOTON = "flex h-10 flex-1 items-center justify-center rounded-lg transition-colors";
+const BOTON =
+  "flex h-10 flex-1 items-center justify-center rounded-lg transition-colors";
 
-export default function PerfumeCard({ perfume, onEditar, onAjustar, onVender }: Props) {
+export default function PerfumeCard({
+  perfume,
+  onEditar,
+  onAjustar,
+  onVender,
+  onEliminar,
+}: Props) {
   const [verFoto, setVerFoto] = useState(false);
+  const [confirmarBorrado, setConfirmarBorrado] = useState(false);
+  const [borrando, setBorrando] = useState(false);
+
+  const borrar = async () => {
+    setBorrando(true);
+    try {
+      await onEliminar();
+    } catch {
+      // El aviso de error lo muestra quien borra (Sileo).
+      setBorrando(false);
+      setConfirmarBorrado(false);
+    }
+  };
 
   // En la compu se espera poder cerrar la foto con Escape.
   useEffect(() => {
@@ -32,6 +53,7 @@ export default function PerfumeCard({ perfume, onEditar, onAjustar, onVender }: 
   }, [verFoto]);
 
   const sugerido = precioSugerido(perfume);
+  const mayorista = precioMayorista(perfume);
   const agotado = sinStock(perfume);
   const poco = pocoStock(perfume);
 
@@ -68,44 +90,85 @@ export default function PerfumeCard({ perfume, onEditar, onAjustar, onVender }: 
               {perfume.marca}
             </p>
           )}
-          <h3 className="truncate text-[13px] font-medium text-white">{perfume.nombre}</h3>
-          <p className="mt-0.5 text-[13px] text-white/75 tabular-nums">{formatoARS(sugerido)}</p>
+          <h3 className="truncate text-[13px] font-medium text-white">
+            {perfume.nombre}
+          </h3>
+          <p className="mt-0.5 text-[13px] text-white/75 tabular-nums">
+            {formatoARS(sugerido)}
+          </p>
+          <p className="text-[12px] text-white/60 tabular-nums">
+            Mayorista {formatoARS(mayorista)}
+          </p>
         </div>
       </div>
 
       {/* Acciones siempre a la vista: desde el celular no hay hover. */}
-      <div className="borde-fino-t flex items-stretch gap-1.5 p-1.5">
-        <button
-          type="button"
-          onClick={onVender}
-          disabled={agotado}
-          aria-label={`Vender ${perfume.nombre}`}
-          title={agotado ? "Sin stock" : "Vender"}
-          className={`${BOTON} bg-acento text-white hover:bg-acento-vivo disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-acento`}
-        >
-          <ShoppingCart size={17} strokeWidth={1.75} />
-        </button>
+      {confirmarBorrado ? (
+        <div className="borde-fino-t flex h-[52px] items-center gap-1.5 p-1.5">
+          <span className="flex-1 truncate px-1 text-[12px] text-tinta">
+            ¿Borrar?
+          </span>
+          <button
+            type="button"
+            onClick={borrar}
+            disabled={borrando}
+            className="btn-chico btn-rojo"
+          >
+            {borrando ? "…" : "Sí"}
+          </button>
+          <button
+            type="button"
+            onClick={() => setConfirmarBorrado(false)}
+            disabled={borrando}
+            className="btn-chico"
+          >
+            No
+          </button>
+        </div>
+      ) : (
+        <div className="borde-fino-t flex items-stretch gap-1.5 p-1.5">
+          <button
+            type="button"
+            onClick={onVender}
+            disabled={agotado}
+            aria-label={`Vender ${perfume.nombre}`}
+            title={agotado ? "Sin stock" : "Vender"}
+            className={`${BOTON} bg-acento text-white hover:bg-acento-vivo disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-acento`}
+          >
+            <ShoppingCart size={17} strokeWidth={1.75} />
+          </button>
 
-        <button
-          type="button"
-          onClick={onAjustar}
-          aria-label={`Ajustar stock de ${perfume.nombre}`}
-          title="Movimiento de stock"
-          className={`${BOTON} borde-fino text-tinta hover:bg-lienzo`}
-        >
-          <ArrowUpDown size={16} strokeWidth={1.75} />
-        </button>
+          <button
+            type="button"
+            onClick={onAjustar}
+            aria-label={`Ajustar stock de ${perfume.nombre}`}
+            title="Movimiento de stock"
+            className={`${BOTON} borde-fino text-tinta hover:bg-lienzo`}
+          >
+            <ArrowUpDown size={16} strokeWidth={1.75} />
+          </button>
 
-        <button
-          type="button"
-          onClick={onEditar}
-          aria-label={`Editar ${perfume.nombre}`}
-          title="Editar"
-          className={`${BOTON} borde-fino text-tinta hover:bg-lienzo`}
-        >
-          <Pencil size={15} strokeWidth={1.75} />
-        </button>
-      </div>
+          <button
+            type="button"
+            onClick={onEditar}
+            aria-label={`Editar ${perfume.nombre}`}
+            title="Editar"
+            className={`${BOTON} borde-fino text-tinta hover:bg-lienzo`}
+          >
+            <Pencil size={15} strokeWidth={1.75} />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setConfirmarBorrado(true)}
+            aria-label={`Borrar ${perfume.nombre}`}
+            title="Borrar"
+            className={`${BOTON} borde-fino text-alerta-texto hover:bg-lienzo`}
+          >
+            <Trash2 size={15} strokeWidth={1.75} />
+          </button>
+        </div>
+      )}
 
       {/* La foto ampliada va al body: si queda dentro de la card, el hover de la
           card le hace de contenedor al position:fixed y la imagen parpadea. */}
@@ -115,7 +178,7 @@ export default function PerfumeCard({ perfume, onEditar, onAjustar, onVender }: 
           <div className="foto-ampliada" onClick={() => setVerFoto(false)}>
             <img src={perfume.foto_url} alt={perfume.nombre} />
           </div>,
-          document.body
+          document.body,
         )}
     </article>
   );

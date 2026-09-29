@@ -183,6 +183,11 @@
     .lista { gap: 20px; }
   }
 
+  /* En la compu las fotos un poco más grandes. */
+  @media (min-width: 1024px) {
+    .lista { grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); }
+  }
+
   /* ---------- Boton flotante ---------- */
 
   .fab {
@@ -1086,3 +1091,11 @@
     .aviso-pago-sale { animation: none; }
   }
 }
+
+/* Aviso de faltante (Sileo): centrado dentro de la barra de arriba (h-14).
+   Fuera de @layer para poder pisar los estilos propios de Sileo, que no usan capas. */
+[data-sileo-viewport][data-position="top-center"] {
+  padding-top: 8px;
+}
+
+.sileo-descripcion-oscura { color: rgba(255, 255, 255, 0.7); }

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { Moon, Plus, Sun } from "lucide-react";
-import { sileo } from "sileo";
+import { sileo, type SileoOptions } from "sileo";
 import { supabase } from "./lib/supabase";
 import { usePerfumes } from "./hooks/usePerfumes";
 import type { Perfume, TipoMovimiento } from "./types";
@@ -17,7 +17,6 @@ import Finanzas from "./components/Finanzas";
 import Navbar from "./components/Navbar";
 import AvisoPago from "./components/AvisoPago";
 import ChipsFiltro from "./components/ChipsFiltro";
-import TiraStockBajo from "./components/TiraStockBajo";
 import { pocoStock } from "./components/umbrales";
 import { estaSaldada } from "./lib/ventas";
 
@@ -122,6 +121,50 @@ function Panel({
     if (error) sileo.error({ title: error });
   }, [error]);
 
+  // Borrar va en rojo tanto si sale bien como si falla.
+  const eliminarConAviso = async (perfume: Perfume) => {
+    try {
+      await eliminar(perfume.id);
+      sileo.error({ title: "Eliminado con éxito" });
+    } catch (e) {
+      sileo.error({
+        title: "No se pudo eliminar",
+        description: e instanceof Error ? e.message : perfume.nombre,
+      });
+      throw e;
+    }
+  };
+
+  // Aviso de faltante fijo: se reemplaza cuando cambia la cantidad y se va en 0.
+  const porReponer = perfumes.filter(pocoStock).length;
+  useEffect(() => {
+    if (cargando || porReponer === 0) return;
+    // Id propio: sin él Sileo usa "sileo-default" para todos y los avisos de
+    // cargado/eliminado reemplazaban (y se llevaban) a este. Sileo lo acepta
+    // aunque sus tipos no lo declaren.
+    const opciones: SileoOptions & { id: string } = {
+      id: "faltante-stock",
+      // Cerrado queda solo el número en la barra de arriba; al pasar el mouse
+      // se abre con el detalle y el botón "Ver".
+      title: String(porReponer),
+      description: `${porReponer === 1 ? "Producto" : "Productos"} por reponer`,
+      duration: null,
+      position: "top-center",
+      autopilot: false,
+      fill: "#1a1a1a",
+      styles: { description: "sileo-descripcion-oscura" },
+      button: {
+        title: "Ver",
+        onClick: () => {
+          setVista("stock");
+          setFiltro(POCO_STOCK);
+        },
+      },
+    };
+    const id = sileo.warning(opciones);
+    return () => sileo.dismiss(id);
+  }, [porReponer, cargando]);
+
   // Los chips salen de las marcas realmente cargadas: no hay campo "categoría".
   const opcionesFiltro = useMemo(() => {
     const marcas = [...new Set(perfumes.map((p) => p.marca).filter(Boolean))].sort((a, b) =>
@@ -143,7 +186,6 @@ function Panel({
   }, [perfumes, busqueda, filtro]);
 
   const bajos = perfumes.filter((p) => p.stock <= 0).length;
-  const porReponer = perfumes.filter(pocoStock).length;
   const pendientes = ventas.filter((v) => !estaSaldada(v));
   const saldadas = ventas.filter(estaSaldada);
 
@@ -189,8 +231,6 @@ function Panel({
               onChange={(e) => setBusqueda(e.target.value)}
             />
 
-            <TiraStockBajo cantidad={porReponer} onVer={() => setFiltro(POCO_STOCK)} />
-
             <ChipsFiltro
               opciones={opcionesFiltro}
               activo={filtro}
@@ -215,6 +255,7 @@ function Panel({
                     onEditar={() => setEditando(p)}
                     onAjustar={() => setAjustando(p)}
                     onVender={() => setVendiendo(p)}
+                    onEliminar={() => eliminarConAviso(p)}
                   />
                 ))}
               </div>
@@ -266,8 +307,12 @@ function Panel({
           perfume={editando}
           onGuardar={(d) => editar(editando.id, d)}
           onEliminar={async () => {
-            await eliminar(editando.id);
-            setEditando(null);
+            try {
+              await eliminarConAviso(editando);
+              setEditando(null);
+            } catch {
+              // El aviso de error ya salió; el form queda abierto.
+            }
           }}
           onCerrar={() => setEditando(null)}
         />
