@@ -18,6 +18,7 @@ import {
   ventasDelMes,
   ventasPorMes,
   ventasPorUsuarioDetalle,
+  type Ganancia,
   type VentasDeUsuario,
 } from "../lib/finanzas";
 import { compartirReporteMensual } from "../lib/reporteMensual";
@@ -35,7 +36,7 @@ interface Props {
     tipo: TipoCaja,
     monto: number,
     descripcion: string,
-    fecha: string
+    fecha: string,
   ) => Promise<void>;
 }
 
@@ -63,9 +64,11 @@ function porcentajeDe(parte: number, total: number): string {
 function CajaUsuarioVentas({
   datos,
   totalGeneral,
+  ganancia,
 }: {
   datos: VentasDeUsuario;
   totalGeneral: number;
+  ganancia?: Ganancia;
 }) {
   const [abierto, setAbierto] = useState(false);
 
@@ -76,7 +79,19 @@ function CajaUsuarioVentas({
         onClick={() => setAbierto((a) => !a)}
         aria-expanded={abierto}
       >
-        <span className="finanzas-usuario-nombre">{datos.usuario}</span>
+        <span className="finanzas-usuario-nombre-bloque">
+          <span className="finanzas-usuario-nombre">{datos.usuario}</span>
+          {ganancia && (
+            <span
+              className={`finanzas-usuario-ganancia ${
+                ganancia.monto < 0 ? "fin-out-texto" : "fin-in-texto"
+              }`}
+            >
+              Ganancia: {formatoARS(ganancia.monto)} (
+              {Math.round(ganancia.porcentaje)}%)
+            </span>
+          )}
+        </span>
         <span className="finanzas-usuario-cabecera-derecha">
           <span className="finanzas-usuario-total">
             {formatoARS(datos.total)}{" "}
@@ -96,10 +111,13 @@ function CajaUsuarioVentas({
           {datos.ventas.map((v) => (
             <li key={v.id}>
               <div className="finanzas-usuario-venta-info">
-                <span className="finanzas-usuario-venta-cliente">{v.cliente}</span>
+                <span className="finanzas-usuario-venta-cliente">
+                  {v.cliente}
+                </span>
                 <span className="finanzas-usuario-venta-meta">
                   {v.perfume_nombre}
-                  {v.cantidad > 1 ? ` ×${v.cantidad}` : ""} · {fechaLinda(v.creado_en)}
+                  {v.cantidad > 1 ? ` ×${v.cantidad}` : ""} ·{" "}
+                  {fechaLinda(v.creado_en)}
                 </span>
               </div>
               <strong>{formatoARS(v.total)}</strong>
@@ -127,7 +145,11 @@ export default function Finanzas({
   const [errorPdf, setErrorPdf] = useState<string | null>(null);
   const [filtroPorMes, setFiltroPorMes] = useState<Record<string, string>>({});
 
-  const descargarMes = async (mesId: string, etiqueta: string, usuarioFiltro: string) => {
+  const descargarMes = async (
+    mesId: string,
+    etiqueta: string,
+    usuarioFiltro: string,
+  ) => {
     setGenerandoMes(mesId);
     setErrorPdf(null);
     try {
@@ -140,10 +162,12 @@ export default function Finanzas({
         idArchivo,
         etiquetaFinal,
         ventasDelMes(mesId, ventas, usuario),
-        movimientosCajaDelMes(mesId, ventas, cajaMovimientos, usuario)
+        movimientosCajaDelMes(mesId, ventas, cajaMovimientos, usuario),
       );
     } catch (e) {
-      setErrorPdf(e instanceof Error ? e.message : "No se pudo generar el PDF.");
+      setErrorPdf(
+        e instanceof Error ? e.message : "No se pudo generar el PDF.",
+      );
     }
     setGenerandoMes(null);
   };
@@ -152,7 +176,7 @@ export default function Finanzas({
   const saldo = saldoCaja(ventas, cajaMovimientos);
   const plataEnLaCalle = ventas.reduce(
     (suma, v) => suma + Math.max(0, v.total - totalPagado(v)),
-    0
+    0,
   );
   const porUsuario = ventasPorUsuarioDetalle(ventas);
   // Lo facturado, sin descontar los movimientos de caja: un retiro baja la caja, no las ventas.
@@ -183,19 +207,27 @@ export default function Finanzas({
           comparativo="Fiado sin cobrar"
           onClick={() => setPlataCalleAbierta(true)}
         />
-        <TarjetaMetrica label="Total de las ventas" valor={formatoARS(totalDeVentas)} />
+        <TarjetaMetrica
+          label="Total de las ventas"
+          valor={formatoARS(totalDeVentas)}
+        />
         {porUsuario.map((u) => (
           <TarjetaMetrica
             key={u.usuario}
             label={`Cuenta · ${u.usuario}`}
-            valor={formatoARS(saldoIndividual(u.usuario, ventas, cajaMovimientos))}
+            valor={formatoARS(
+              saldoIndividual(u.usuario, ventas, cajaMovimientos),
+            )}
             onClick={() => setCuentaAbierta(u.usuario)}
           />
         ))}
       </div>
 
       <div className="sub-tabs">
-        <button className={seccion === "caja" ? "activo" : ""} onClick={() => setSeccion("caja")}>
+        <button
+          className={seccion === "caja" ? "activo" : ""}
+          onClick={() => setSeccion("caja")}
+        >
           Caja
         </button>
         <button
@@ -204,14 +236,20 @@ export default function Finanzas({
         >
           Por usuario
         </button>
-        <button className={seccion === "meses" ? "activo" : ""} onClick={() => setSeccion("meses")}>
+        <button
+          className={seccion === "meses" ? "activo" : ""}
+          onClick={() => setSeccion("meses")}
+        >
           Por mes
         </button>
       </div>
 
       {seccion === "caja" && (
         <>
-          <button className="btn-secundario finanzas-btn-mov" onClick={() => setModalAbierto(true)}>
+          <button
+            className="btn-secundario finanzas-btn-mov"
+            onClick={() => setModalAbierto(true)}
+          >
             + Movimiento de caja
           </button>
           {ledger.length === 0 ? (
@@ -239,7 +277,12 @@ export default function Finanzas({
         ) : (
           <ul className="finanzas-usuarios">
             {porUsuario.map((u) => (
-              <CajaUsuarioVentas key={u.usuario} datos={u} totalGeneral={totalDeVentas} />
+              <CajaUsuarioVentas
+                key={u.usuario}
+                datos={u}
+                totalGeneral={totalDeVentas}
+                ganancia={gananciaUsuarios.find((g) => g.usuario === u.usuario)}
+              />
             ))}
           </ul>
         ))}
@@ -253,40 +296,85 @@ export default function Finanzas({
             <ul className="finanzas-meses">
               {meses.map((mes) => {
                 const usuarioFiltro = filtroPorMes[mes.mes] ?? "";
+                const ventasMes = ventasDelMes(mes.mes, ventas);
+                const gananciaMes = gananciaTotal(ventasMes, perfumes);
+                const gananciaMesUsuarios = gananciaPorUsuario(
+                  ventasMes,
+                  perfumes,
+                );
                 return (
                   <li key={mes.mes} className="finanzas-mes">
                     <div className="finanzas-mes-cabecera">
-                      <span className="finanzas-mes-etiqueta">{mes.etiqueta}</span>
-                      <span className="finanzas-mes-total">{formatoARS(mes.total)}</span>
+                      <span className="finanzas-mes-etiqueta">
+                        {mes.etiqueta}
+                      </span>
+                      <span className="finanzas-mes-total">
+                        {formatoARS(mes.total)}
+                      </span>
                     </div>
+                    <p
+                      className={`finanzas-mes-ganancia ${
+                        gananciaMes.monto < 0 ? "fin-out-texto" : "fin-in-texto"
+                      }`}
+                    >
+                      Ganancia del mes:{" "}
+                      <strong>{formatoARS(gananciaMes.monto)}</strong> (
+                      {Math.round(gananciaMes.porcentaje)}%)
+                    </p>
                     <ul className="finanzas-mes-usuarios">
-                      {mes.porUsuario.map((u) => (
-                        <li key={u.usuario}>
-                          <span>{u.usuario}</span>
-                          <span>
-                            {formatoARS(u.total)}{" "}
-                            <span className="finanzas-tarjeta-porcentaje">
-                              ({porcentajeDe(u.total, mes.total)})
+                      {mes.porUsuario.map((u) => {
+                        const g = gananciaMesUsuarios.find(
+                          (x) => x.usuario === u.usuario,
+                        );
+                        return (
+                          <li key={u.usuario}>
+                            <span className="finanzas-usuario-nombre-bloque">
+                              <span>{u.usuario}</span>
+                              {g && (
+                                <span
+                                  className={`finanzas-usuario-ganancia ${
+                                    g.monto < 0
+                                      ? "fin-out-texto"
+                                      : "fin-in-texto"
+                                  }`}
+                                >
+                                  Ganancia: {formatoARS(g.monto)} (
+                                  {Math.round(g.porcentaje)}%)
+                                </span>
+                              )}
                             </span>
-                          </span>
-                        </li>
-                      ))}
+                            <span>
+                              {formatoARS(u.total)}{" "}
+                              <span className="finanzas-tarjeta-porcentaje">
+                                ({porcentajeDe(u.total, mes.total)})
+                              </span>
+                            </span>
+                          </li>
+                        );
+                      })}
                     </ul>
 
                     <p className="finanzas-mes-pdf-label">Descargar PDF de:</p>
                     <div className="filtro-mov">
                       <button
                         className={usuarioFiltro === "" ? "activo" : ""}
-                        onClick={() => setFiltroPorMes((f) => ({ ...f, [mes.mes]: "" }))}
+                        onClick={() =>
+                          setFiltroPorMes((f) => ({ ...f, [mes.mes]: "" }))
+                        }
                       >
                         Todos
                       </button>
                       {mes.porUsuario.map((u) => (
                         <button
                           key={u.usuario}
-                          className={usuarioFiltro === u.usuario ? "activo" : ""}
+                          className={
+                            usuarioFiltro === u.usuario ? "activo" : ""
+                          }
                           onClick={() =>
-                            setFiltroPorMes((f) => ({ ...f, [mes.mes]: u.usuario }))
+                            setFiltroPorMes((f) => ({
+                              ...f,
+                              [mes.mes]: u.usuario,
+                            }))
                           }
                         >
                           {u.usuario}
@@ -295,7 +383,9 @@ export default function Finanzas({
                     </div>
                     <button
                       className="btn-chico finanzas-mes-pdf"
-                      onClick={() => descargarMes(mes.mes, mes.etiqueta, usuarioFiltro)}
+                      onClick={() =>
+                        descargarMes(mes.mes, mes.etiqueta, usuarioFiltro)
+                      }
                       disabled={generandoMes === mes.mes}
                     >
                       {generandoMes === mes.mes ? (
@@ -337,7 +427,10 @@ export default function Finanzas({
       )}
 
       {plataCalleAbierta && (
-        <div className="modal-fondo" onClick={() => setPlataCalleAbierta(false)}>
+        <div
+          className="modal-fondo"
+          onClick={() => setPlataCalleAbierta(false)}
+        >
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-cabecera">
               <h2>Plata en la calle</h2>
@@ -350,7 +443,10 @@ export default function Finanzas({
               </button>
             </div>
             <p className="modal-sub">
-              Total fiado: <strong className="texto-rojo">{formatoARS(plataEnLaCalle)}</strong>
+              Total fiado:{" "}
+              <strong className="texto-rojo">
+                {formatoARS(plataEnLaCalle)}
+              </strong>
             </p>
 
             {fiadoUsuarios.length === 0 ? (
@@ -360,7 +456,9 @@ export default function Finanzas({
                 {fiadoUsuarios.map((u) => (
                   <li key={u.usuario} className="desglose-fila">
                     <span className="desglose-nombre">{u.usuario}</span>
-                    <span className="desglose-monto fin-out-texto">{formatoARS(u.total)}</span>
+                    <span className="desglose-monto fin-out-texto">
+                      {formatoARS(u.total)}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -394,7 +492,9 @@ export default function Finanzas({
                 {gananciaUsuarios.map((u) => (
                   <li key={u.usuario} className="desglose-fila">
                     <span className="desglose-nombre">{u.usuario}</span>
-                    <span className={`desglose-monto ${u.monto < 0 ? "fin-out-texto" : "fin-in-texto"}`}>
+                    <span
+                      className={`desglose-monto ${u.monto < 0 ? "fin-out-texto" : "fin-in-texto"}`}
+                    >
                       {formatoARS(u.monto)}{" "}
                       <span className="finanzas-tarjeta-porcentaje">
                         ({Math.round(u.porcentaje)}%)

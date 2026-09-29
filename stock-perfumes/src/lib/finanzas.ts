@@ -36,7 +36,7 @@ export function gananciaPorUsuario(
   return [...mapa.entries()]
     .map(([usuario, { vendido, costo }]) => {
       const monto = vendido - costo;
-      return { usuario, monto, porcentaje: vendido > 0 ? (monto / vendido) * 100 : 0 };
+      return { usuario, monto, porcentaje: costo > 0 ? (monto / costo) * 100 : 0 };
     })
     .sort((a, b) => b.monto - a.monto);
 }
@@ -49,7 +49,8 @@ export function gananciaTotal(
   const porUsuario = gananciaPorUsuario(ventas, perfumes);
   const monto = porUsuario.reduce((suma, g) => suma + g.monto, 0);
   const totalVendido = ventas.reduce((suma, v) => suma + v.total, 0);
-  return { monto, porcentaje: totalVendido > 0 ? (monto / totalVendido) * 100 : 0 };
+  const costoTotal = totalVendido - monto;
+  return { monto, porcentaje: costoTotal > 0 ? (monto / costoTotal) * 100 : 0 };
 }
 
 export interface TotalPorUsuario {
