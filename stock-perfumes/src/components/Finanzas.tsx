@@ -43,6 +43,30 @@ interface Props {
 
 type Seccion = "caja" | "usuarios" | "meses";
 
+const CLAVE_ENVIOS = "finanzas-envios";
+// Versión anterior: un solo monto guardado como texto.
+const CLAVE_ENVIO_VIEJA = "finanzas-envio";
+
+interface Envio {
+  id: string;
+  monto: number;
+  fecha: string;
+}
+
+function leerEnvios(): Envio[] {
+  try {
+    const guardados = localStorage.getItem(CLAVE_ENVIOS);
+    if (guardados) return JSON.parse(guardados) as Envio[];
+    const viejo = Number(localStorage.getItem(CLAVE_ENVIO_VIEJA));
+    if (viejo > 0) {
+      return [{ id: crypto.randomUUID(), monto: viejo, fecha: new Date().toISOString() }];
+    }
+  } catch {
+    // Almacenamiento no disponible o dato corrupto: se arranca sin envíos.
+  }
+  return [];
+}
+
 const ETIQUETA_TIPO: Record<string, string> = {
   cobro: "Cobro",
   ingreso: "Ingreso",
@@ -142,6 +166,30 @@ export default function Finanzas({
   const [cuentaAbierta, setCuentaAbierta] = useState<string | null>(null);
   const [plataCalleAbierta, setPlataCalleAbierta] = useState(false);
   const [gananciaAbierta, setGananciaAbierta] = useState(false);
+  const [envios, setEnvios] = useState<Envio[]>(leerEnvios);
+  const [envioNuevo, setEnvioNuevo] = useState("");
+
+  const guardarEnvios = (lista: Envio[]) => {
+    setEnvios(lista);
+    try {
+      localStorage.setItem(CLAVE_ENVIOS, JSON.stringify(lista));
+    } catch {
+      // Sin almacenamiento disponible: los envíos quedan solo en esta sesión.
+    }
+  };
+
+  const agregarEnvio = () => {
+    const monto = Number(envioNuevo);
+    if (!(monto > 0)) return;
+    guardarEnvios([
+      { id: crypto.randomUUID(), monto, fecha: new Date().toISOString() },
+      ...envios,
+    ]);
+    setEnvioNuevo("");
+  };
+
+  const quitarEnvio = (id: string) =>
+    guardarEnvios(envios.filter((e) => e.id !== id));
   const [generandoMes, setGenerandoMes] = useState<string | null>(null);
   const [errorPdf, setErrorPdf] = useState<string | null>(null);
   const [filtroPorMes, setFiltroPorMes] = useState<Record<string, string>>({});
@@ -186,6 +234,8 @@ export default function Finanzas({
   const meses = ventasPorMes(ventas);
   const fiadoUsuarios = fiadoPorUsuario(ventas);
   const ganancia = gananciaTotal(ventas, perfumes);
+  const montoEnvio = envios.reduce((suma, e) => suma + e.monto, 0);
+  const gananciaFinal = ganancia.monto - montoEnvio;
   const gananciaUsuarios = gananciaPorUsuario(ventas, perfumes);
   const gananciaMeses = gananciaPorMes(ventas, perfumes);
 
@@ -196,10 +246,14 @@ export default function Finanzas({
         <TarjetaMetrica label="Capital en stock" valor={formatoARS(capital)} />
         <TarjetaMetrica
           label="Ganancia"
-          valor={formatoARS(ganancia.monto)}
-          comparativo={`${Math.round(ganancia.porcentaje)}% sobre el costo`}
-          tendencia={ganancia.monto < 0 ? "baja" : "sube"}
-          tono={ganancia.monto < 0 ? "sale" : "entra"}
+          valor={formatoARS(gananciaFinal)}
+          comparativo={
+            montoEnvio > 0
+              ? `Ganancia final · envío ${formatoARS(montoEnvio)} descontado`
+              : `${Math.round(ganancia.porcentaje)}% sobre el costo`
+          }
+          tendencia={gananciaFinal < 0 ? "baja" : "sube"}
+          tono={gananciaFinal < 0 ? "sale" : "entra"}
           onClick={() => setGananciaAbierta(true)}
         />
         <TarjetaMetrica
@@ -485,6 +539,61 @@ export default function Finanzas({
             <p className="modal-sub">
               Total: <strong>{formatoARS(ganancia.monto)}</strong> (
               {Math.round(ganancia.porcentaje)}%)
+            </p>
+
+            <label className="campo">
+              <span>Envío</span>
+              <input
+                type="number"
+                inputMode="decimal"
+                value={envioNuevo}
+                onChange={(e) => setEnvioNuevo(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && agregarEnvio()}
+                placeholder="0"
+              />
+            </label>
+            <button
+              className="btn-chico"
+              onClick={agregarEnvio}
+              disabled={!(Number(envioNuevo) > 0)}
+            >
+              + Agregar envío
+            </button>
+
+            {envios.length > 0 && (
+              <>
+                <p className="cuenta-subtitulo">
+                  Envíos acumulados: {formatoARS(montoEnvio)}
+                </p>
+                <ul className="desglose-usuarios">
+                  {envios.map((e) => (
+                    <li key={e.id} className="desglose-fila">
+                      <span className="desglose-nombre">
+                        {fechaLinda(e.fecha)}
+                      </span>
+                      <span className="desglose-monto fin-out-texto">
+                        −{formatoARS(e.monto)}
+                      </span>
+                      <button
+                        className="modal-cerrar"
+                        onClick={() => quitarEnvio(e.id)}
+                        aria-label="Quitar envío"
+                      >
+                        ✕
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+
+            <p className="vista-previa">
+              Ganancia final:{" "}
+              <strong
+                className={gananciaFinal < 0 ? "fin-out-texto" : "fin-in-texto"}
+              >
+                {formatoARS(gananciaFinal)}
+              </strong>
             </p>
 
             {gananciaUsuarios.length === 0 ? (
