@@ -1,16 +1,22 @@
 {
-  "name": "Stock Productos",
-  "short_name": "Productos",
+  "name": "GeStock",
+  "short_name": "GeStock",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f6f3ed",
   "theme_color": "#1c1917",
   "icons": [
     {
-      "src": "/icono.png",
-      "sizes": "424x424",
+      "src": "/icono-192.png",
+      "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/icono-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }
