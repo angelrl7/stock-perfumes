@@ -18,7 +18,12 @@ const TIPO_PAGO: Record<string, string> = {
 function construirTicket(venta: Venta): jsPDF {
   const pagado = totalPagado(venta);
   const saldo = venta.total - pagado;
-  const alto = 105 + venta.pagos.length * 5;
+  const producto = `${venta.perfume_nombre} x${venta.cantidad}`;
+  const medidor = new jsPDF({ unit: "mm" });
+  medidor.setFont("helvetica", "bold");
+  medidor.setFontSize(9);
+  const lineasProducto: string[] = medidor.splitTextToSize(producto, 42);
+  const alto = 105 + venta.pagos.length * 5 + (lineasProducto.length - 1) * 4;
   const doc = new jsPDF({ unit: "mm", format: [ANCHO, alto] });
   const cx = ANCHO / 2;
   let y = 12;
@@ -31,8 +36,10 @@ function construirTicket(venta: Venta): jsPDF {
   };
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(13);
-  doc.text("STOCK PRODUCTOS", cx, y, { align: "center" });
+  doc.setFontSize(16);
+  doc.setTextColor(15, 110, 86); // --color-acento (#0f6e56)
+  doc.text("GeStock", cx, y, { align: "center" });
+  doc.setTextColor(0);
   y += 5;
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
@@ -60,9 +67,9 @@ function construirTicket(venta: Venta): jsPDF {
   linea();
 
   doc.setFont("helvetica", "bold");
-  doc.text(`${venta.perfume_nombre} x${venta.cantidad}`, IZQ, y, { maxWidth: 42 });
+  doc.text(lineasProducto, IZQ, y, { lineHeightFactor: 1.25 });
   doc.text(formatoARS(venta.total), DER, y, { align: "right" });
-  y += 5;
+  y += 5 + (lineasProducto.length - 1) * 4;
   doc.setFont("helvetica", "normal");
   doc.text(`Forma de pago: ${TIPO_PAGO[venta.tipo_pago] ?? venta.tipo_pago}`, IZQ, y);
   y += 6;
